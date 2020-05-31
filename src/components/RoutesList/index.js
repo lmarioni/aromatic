@@ -45,7 +45,7 @@ const RoutesList = () => {
     <Card.Group>
       {routes.map((route) => {
         return (
-          <Card>
+          <Card inverted>
             <Card.Content>
               <Card.Header>{route.nombre}</Card.Header>
               <Card.Description>

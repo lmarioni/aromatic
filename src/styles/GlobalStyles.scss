@@ -1,4 +1,23 @@
 @import "./Animations.scss";
+
+html,
+body {
+    background-color: #252839 !important;
+}
+p {
+    align-content: center;
+    background-color: #495285;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 6em;
+}
+p > span {
+    opacity: 0.4;
+    text-align: center;
+}
+
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
     color: #007bff;
@@ -102,6 +121,6 @@
 .jumbotron {
     padding: 2rem;
 }
-.justify-content-evenly{
+.justify-content-evenly {
     justify-content: space-evenly;
 }

@@ -2,7 +2,16 @@ import React, { useState, useContext, useEffect } from "react";
 import _ from "lodash";
 import faker from "faker";
 import { Context } from "../Context";
-import { Container, Header, Grid, Search } from "semantic-ui-react";
+import {
+  Container,
+  Header,
+  Grid,
+  Search,
+  Icon,
+  Divider,
+  Segment,
+  Button,
+} from "semantic-ui-react";
 import RoutesList from "../components/RoutesList";
 
 const source = _.times(5, () => ({
@@ -19,9 +28,7 @@ export const Home = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [value, setValue] = useState("");
 
-  useEffect(function () {
-    
-  }, []);
+  useEffect(function () {}, []);
 
   const reset = () => {
     setLoadingSearch("");
@@ -47,26 +54,28 @@ export const Home = () => {
   };
 
   return (
-    <div>
-      <Container style={{ marginTop: "7em" }}>
-        <Header as="h1">Selección de rutas</Header>
-        <Grid columns={6}>
-          <Grid.Row>
-            <Grid.Column>
-              <Search
-                loading={loadingSearch}
-                onResultSelect={handleResultSelect}
-                onSearchChange={_.debounce(handleSearchChange, 500, {
-                  leading: true,
-                })}
-                results={searchResults}
-                value={value}
-              />
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
-        <RoutesList />
-      </Container>
-    </div>
+    <Container style={{ marginTop: "7em" }} textAlign="center">
+      <Header as="h1" inverted textAlign="center">
+        Selección de rutas
+      </Header>
+      <Grid>
+        <Grid.Column floated="left" width={5}>
+          <Button primary>Crear nueva ruta</Button>
+        </Grid.Column>
+        <Grid.Column floated="right" width={5}>
+          <Search
+            loading={loadingSearch}
+            onResultSelect={handleResultSelect}
+            onSearchChange={_.debounce(handleSearchChange, 500, {
+              leading: true,
+            })}
+            results={searchResults}
+            value={value}
+          />
+        </Grid.Column>
+      </Grid>
+      <Divider />
+      <RoutesList />
+    </Container>
   );
 };

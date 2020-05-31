@@ -1,20 +1,37 @@
-import React from 'react'
-import {
-  Container,
-  Image,
-  Menu
-} from 'semantic-ui-react';
+import React, { useContext, useEffect, useState } from "react";
+import { Container, Menu } from "semantic-ui-react";
 
-import Logo from "../../assets/img/logo/logo.png";
+export const NavBar = () => {
+  const [currentRoute, setCurrentRoute] = useState("");
 
-export const NavBar = () => (
-    <Menu fixed='top' inverted>
+  const fixed = true;
+  const params = window.location.href.split("/");
+
+  useEffect(function () {
+    const route =
+      params && params.length ? params[params.length - 1].split("?")[0] : "";
+    setCurrentRoute(route);
+  }, []);
+
+  const handleRedirect = () => {
+    if (currentRoute !== "") {
+      window.location.href = `./`;
+    }
+  };
+
+  return (
+    <Menu fixed={fixed ? "top" : null} inverted pointing secondary size="large">
       <Container>
-        <Menu.Item as='a' header>
-          <Image size='mini' src={Logo} style={{ marginRight: '1.5em' }} />
-          Aromatic
+        <Menu.Item
+          as="a"
+          active
+          onClick={() => {
+            handleRedirect();
+          }}
+        >
+          Inicio
         </Menu.Item>
-        <Menu.Item as='a'>Inicio</Menu.Item>
       </Container>
     </Menu>
-)
+  );
+};

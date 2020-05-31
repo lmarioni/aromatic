@@ -15,7 +15,6 @@ const App = () => {
   return (
     <Suspense fallback={<div />}>
       <NavBar />
-
       <Router>
         <NotFound default />
         <NotRegister path="/not-register" />
