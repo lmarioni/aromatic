@@ -12,30 +12,16 @@ import {
 import { Context } from "../../Context";
 import "./styles.scss";
 
-const RoutesList = () => {
+const RoutesList = ({routesList = []}) => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
   const [routes, setRoutes] = useState([]);
 
   useEffect(function () {
-    fetchRoutes();
-  }, []);
-
-  const fetchRoutes = () => {
-    setLoading(true);
-    const data = {
-      headers: new Headers({
-        Authorization: "Bearer " + token,
-      }),
-    };
-
-    fetch(`${process.env.REACT_APP_BASE_URL}/rutas/`, data)
-      .then((res) => res.json())
-      .then((response) => {
-        setRoutes(response);
-        setLoading(false);
-      });
-  };
+    if(routesList){
+      setRoutes(routesList);
+    }
+  }, [routesList]);
 
   const redirect = (id = 0) => {
     window.location.href = `./route-details?i=${id}`;
@@ -45,7 +31,7 @@ const RoutesList = () => {
     <Card.Group>
       {routes.map((route) => {
         return (
-          <Card inverted>
+          <Card inverted key={`route-${route.id}`}>
             <Card.Content>
               <Card.Header>{route.nombre}</Card.Header>
               <Card.Description>
@@ -72,32 +58,9 @@ const RoutesList = () => {
     </Card.Group>
   );
 
-  const renderNoRoutes = () => (
-    <div className="noRoutes">
-      <Segment placeholder textAlign="center">
-        <Header icon>
-          <Icon name="search" />
-          Parece que no hay rutas cargadas
-        </Header>
-        <Segment.Inline>
-          <Button primary>Crear ruta</Button>
-        </Segment.Inline>
-      </Segment>
-    </div>
-  );
-  const renderLoading = () => (
-    <Dimmer active inverted>
-      <Loader inverted>Cargando datos</Loader>
-    </Dimmer>
-  );
-
   return (
     <div>
-      {loading
-        ? renderLoading()
-        : routes.length
-        ? renderRoutes()
-        : renderNoRoutes()}
+      {routes.length && renderRoutes()}
     </div>
   );
 };

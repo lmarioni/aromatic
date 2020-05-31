@@ -10,6 +10,8 @@ import {
   Dimmer,
   Loader,
   Table,
+  Divider,
+  Grid,
 } from "semantic-ui-react";
 import { useLocation } from "@reach/router";
 
@@ -48,13 +50,13 @@ export const RouteDetail = () => {
   };
 
   const renderNoClients = () => (
-    <Segment placeholder textAlign="center" style={{ marginTop: "7em" }}>
+    <Segment secondary textAlign="center" style={{ marginTop: "7em" }}>
       <Header icon>
         <Icon name="search" />
-        Parece que no hay usuarios cargados
+        Parece que no hay clientes cargados para esta ruta
       </Header>
       <Segment.Inline>
-        <Button primary>Cargar usuarios</Button>
+        <Button primary>Asignar clientes</Button>
       </Segment.Inline>
     </Segment>
   );
@@ -109,8 +111,22 @@ export const RouteDetail = () => {
   };
 
   return (
-    <Container style={{ marginTop: "7em" }}>
-      <Header as="h1">Ruta / Listado de clientes</Header>
+    <Container style={{ marginTop: "7em" }} textAlign="center">
+      <Header as="h1" inverted textAlign="center">
+        Ruta / Listado de clientes
+      </Header>
+      <Grid>
+        <Grid.Column floated="left" width={4}>
+          <Button primary>Imprimir facturas</Button>
+        </Grid.Column>
+        <Grid.Column floated="center" width={4}>
+          <Button primary>Asignar reparto</Button>
+        </Grid.Column>
+        <Grid.Column floated="right" width={4}>
+          <Button primary>Asignar clientes</Button>
+        </Grid.Column>
+      </Grid>
+      <Divider />
       {loading
         ? renderLoading()
         : clients.length

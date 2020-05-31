@@ -7,10 +7,12 @@ import {
   Header,
   Grid,
   Search,
-  Icon,
   Divider,
-  Segment,
   Button,
+  Dimmer,
+  Loader,
+  Segment,
+  Icon
 } from "semantic-ui-react";
 import RoutesList from "../components/RoutesList";
 
@@ -24,11 +26,30 @@ const source = _.times(5, () => ({
 export const Home = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
-  const [loadingSearch, setLoadingSearch] = useState("");
+  const [loadingSearch, setLoadingSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [routesList, setRoutesList] = useState([]);
   const [value, setValue] = useState("");
 
-  useEffect(function () {}, []);
+  useEffect(function () {
+    fetchRoutes();
+  }, []);
+
+  const fetchRoutes = () => {
+    setLoading(true);
+    const data = {
+      headers: new Headers({
+        Authorization: "Bearer " + token,
+      }),
+    };
+
+    fetch(`${process.env.REACT_APP_BASE_URL}/rutas/`, data)
+      .then((res) => res.json())
+      .then((response) => {
+        setRoutesList(response);
+        setLoading(false);
+      });
+  };
 
   const reset = () => {
     setLoadingSearch("");
@@ -53,7 +74,31 @@ export const Home = () => {
     }, 300);
   };
 
+  const renderNoRoutes = () => (
+    <div className="noRoutes">
+      <Segment placeholder textAlign="center">
+        <Header icon>
+          <Icon name="search" />
+          Parece que no hay rutas cargadas
+        </Header>
+        <Segment.Inline>
+          <Button primary>Crear ruta</Button>
+        </Segment.Inline>
+      </Segment>
+    </div>
+  );
+  const renderLoading = () => (
+    <Dimmer active inverted>
+      <Loader inverted>Cargando datos</Loader>
+    </Dimmer>
+  );
+
+  const renderRoutes = () => (
+    <RoutesList routesList={routesList} />
+  )
+
   return (
+
     <Container style={{ marginTop: "7em" }} textAlign="center">
       <Header as="h1" inverted textAlign="center">
         Selección de rutas
@@ -75,7 +120,11 @@ export const Home = () => {
         </Grid.Column>
       </Grid>
       <Divider />
-      <RoutesList />
+      {loading
+        ? renderLoading()
+        : routesList.length
+        ? renderRoutes()
+        : renderNoRoutes()}
     </Container>
   );
 };
