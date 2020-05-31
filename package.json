@@ -53,6 +53,7 @@
     "react-datasheet": "^1.4.4",
     "react-dev-utils": "^10.2.1",
     "react-dom": "^16.13.1",
+    "react-excel-renderer": "^1.1.0",
     "react-icons": "^3.10.0",
     "react-test-renderer": "^16.13.1",
     "resolve": "1.15.0",
