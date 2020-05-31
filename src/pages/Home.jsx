@@ -12,7 +12,10 @@ import {
   Dimmer,
   Loader,
   Segment,
-  Icon
+  Icon,
+  Modal,
+  Form,
+  Message,
 } from "semantic-ui-react";
 import RoutesList from "../components/RoutesList";
 
@@ -26,9 +29,14 @@ const source = _.times(5, () => ({
 export const Home = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
+  const [loadingSubmitButton, setLoadingSubmitButton] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [routeName, setRouteName] = useState("");
   const [routesList, setRoutesList] = useState([]);
+  const [message, setMessage] = useState({});
+  const [showMessage, setShowMessage] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
   const [value, setValue] = useState("");
 
   useEffect(function () {
@@ -52,6 +60,7 @@ export const Home = () => {
   };
 
   const reset = () => {
+    setRouteName("");
     setLoadingSearch("");
     setSearchResults([]);
     setValue("");
@@ -74,6 +83,63 @@ export const Home = () => {
     }, 300);
   };
 
+  const handleOpenModal = () => setModalShow(true);
+  const handleCloseModal = () => {
+    reset();
+    setModalShow(false);
+  };
+
+  const handleSetMessage = (messageStatus) => {
+    const newMessage = {
+      type: messageStatus,
+      title: messageStatus === "success" ? "Perfecto" : "Error",
+      content:
+        messageStatus === "success"
+          ? "La ruta se ha creado satisfactoriamente"
+          : "Hubo un error al crear la ruta.",
+    };
+    setMessage(newMessage);
+    setShowMessage(true);
+    setTimeout(function () {
+      setShowMessage(false);
+      setMessage({});
+    }, 1500);
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setLoadingSubmitButton(true);
+    const requestOptions = {
+      method: "POST",
+      headers: new Headers({
+        authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify({
+        nombre: routeName,
+      }),
+    };
+    const response = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/rutas`,
+      requestOptions
+    );
+    const parsedResponse = await response.json();
+    handleSetMessage(parsedResponse.status);
+    if (parsedResponse.status === "success") {
+      setLoadingSubmitButton(false);
+      const newRoutes = routesList;
+      newRoutes.push(parsedResponse.ruta);
+      setRoutesList(newRoutes);
+      handleCloseModal();
+    } else {
+      setLoadingSubmitButton(false);
+    }
+  };
+
   const renderNoRoutes = () => (
     <div className="noRoutes">
       <Segment placeholder textAlign="center">
@@ -93,38 +159,82 @@ export const Home = () => {
     </Dimmer>
   );
 
-  const renderRoutes = () => (
-    <RoutesList routesList={routesList} />
-  )
+  const renderRoutes = () => <RoutesList routesList={routesList} />;
+
+  const renderModal = () => (
+    <Modal size="small" open={modalShow}>
+      <Header content="Crear nueva ruta" />
+      <Modal.Content>
+        <Form onSubmit={handleSubmit}>
+          <Form.Field>
+            <label>Nombre de la ruta</label>
+            <input
+              value={routeName}
+              onChange={(e) => setRouteName(e.target.value)}
+              name="routeName"
+              type="text"
+              placeholder="Ingrese aquí el nombre para la nueva ruta"
+            />
+          </Form.Field>
+        </Form>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button basic onClick={handleCloseModal}>
+          <Icon name="remove" /> Cancelar
+        </Button>
+        <Button
+          color="green"
+          onClick={handleSubmit}
+          loading={loadingSubmitButton}
+        >
+          <Icon name="checkmark" /> Guardar
+        </Button>
+      </Modal.Actions>
+    </Modal>
+  );
 
   return (
-
-    <Container style={{ marginTop: "7em" }} textAlign="center">
-      <Header as="h1" inverted textAlign="center">
-        Selección de rutas
-      </Header>
-      <Grid>
-        <Grid.Column floated="left" width={5}>
-          <Button primary>Crear nueva ruta</Button>
-        </Grid.Column>
-        <Grid.Column floated="right" width={5}>
-          <Search
-            loading={loadingSearch}
-            onResultSelect={handleResultSelect}
-            onSearchChange={_.debounce(handleSearchChange, 500, {
-              leading: true,
-            })}
-            results={searchResults}
-            value={value}
-          />
-        </Grid.Column>
-      </Grid>
-      <Divider />
-      {loading
-        ? renderLoading()
-        : routesList.length
-        ? renderRoutes()
-        : renderNoRoutes()}
-    </Container>
+    <div>
+      {renderModal()}
+      <Container style={{ marginTop: "7em" }} textAlign="center">
+        <Header as="h1" inverted textAlign="center">
+          Selección de rutas
+        </Header>
+        <Grid>
+          <Grid.Column floated="left" width={5}>
+            <Button primary onClick={handleOpenModal}>
+              Crear nueva ruta
+            </Button>
+          </Grid.Column>
+          <Grid.Column floated="right" width={5}>
+            <Search
+              loading={loadingSearch}
+              onResultSelect={handleResultSelect}
+              onSearchChange={_.debounce(handleSearchChange, 500, {
+                leading: true,
+              })}
+              results={searchResults}
+              value={value}
+            />
+          </Grid.Column>
+        </Grid>
+        <Divider />
+        {showMessage && message && (
+          <Message
+            inverted
+            positive={message.type === "success"}
+            negative={message.type === "error"}
+          >
+            <Message.Header>{message.title}</Message.Header>
+            <p>{message.content}</p>
+          </Message>
+        )}
+        {loading
+          ? renderLoading()
+          : routesList.length
+          ? renderRoutes()
+          : renderNoRoutes()}
+      </Container>
+    </div>
   );
 };
