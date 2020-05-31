@@ -1,7 +1,7 @@
 import React from "react";
 import "../styles/NotRegister.scss";
 import { navigate, Link } from "@reach/router";
-import { Button } from "semantic-ui-react";
+import { Button, Header } from "semantic-ui-react";
 import Cookies from "universal-cookie";
 
 const authCookie = `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiIyMTA5NSJ9.MezTb9xGhGCU0h-JkjBuLAN1KfyysJslNd5n130403g`;
@@ -31,9 +31,14 @@ export const NotRegister = () => {
       />
 
       <div className="message-box">
-        <h2>No estás logueado</h2>
-        <p>Debes ingresar al sistema para seguir</p>
-        <Button>
+        <Header as="h1" inverted >
+          No estás logueado
+        </Header>
+        <Header as="h4" inverted >
+          Debes ingresar al sistema para seguir
+        </Header>
+
+        <Button inverted>
           <Link to="/auth" className="btn btn-success btn-lg">
             Ingresar
           </Link>
