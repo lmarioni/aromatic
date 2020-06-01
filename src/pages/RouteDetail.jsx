@@ -61,9 +61,33 @@ export const RouteDetail = () => {
       });
   };
 
-  const handleSubmitAssignClients = () => {
-    console.log("Submit!");
-    setShowAssignModalClients(false);
+  const handleSubmitAssignClients = async () => {
+    setLoadingSubmitAssignClientsButton(true);
+    const requestOptions = {
+      method: "POST",
+      headers: new Headers({
+        authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify(newRoutes),
+    };
+    const response = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/clientes`,
+      requestOptions
+    );
+    const parsedResponse = await response.json();
+
+    if (parsedResponse.status === "success") {
+      setLoadingSubmitAssignClientsButton(false);
+      setShowAssignModalClients(false);
+      const allClients = clients;
+      allClients.concat(newRoutes);
+      handleCloseAssignClientsModal();
+    } else {
+      setShowAssignModalClients(false);
+      setLoadingSubmitAssignClientsButton(false);
+    }
   };
 
   const handleCloseAssignClientsModal = () => {
@@ -90,8 +114,6 @@ export const RouteDetail = () => {
       } else {
         setUploadingFile(false);
         const header = resp.rows.shift();
-        console.log(resp.rows);
-        console.log(header);
         const newRoutesParsed = resp.rows.map((routeRow) => {
           return {
             idruta: routeRow[0],
@@ -102,7 +124,9 @@ export const RouteDetail = () => {
             direccion: routeRow[6],
             localidad: routeRow[7],
             cpostal: routeRow[8],
+            provincia: routeRow[9],
             telefono: routeRow[10],
+            telefono2: routeRow[11],
             email: routeRow[12],
           };
         });
