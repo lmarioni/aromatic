@@ -12,32 +12,31 @@ import {
 import { Context } from "../../Context";
 import "./styles.scss";
 
-const RoutesList = ({routesList = []}) => {
+const RoutesList = ({ routesList = [] }) => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
   const [routes, setRoutes] = useState([]);
 
-  useEffect(function () {
-    if(routesList){
-      setRoutes(routesList);
-    }
-  }, [routesList]);
+  useEffect(
+    function () {
+      if (routesList) {
+        setRoutes(routesList);
+      }
+    },
+    [routesList]
+  );
 
   const redirect = (id = 0) => {
     window.location.href = `./route-details?i=${id}`;
   };
 
   const renderRoutes = () => (
-    <Card.Group>
+    <Card.Group className="routeListContainer">
       {routes.map((route) => {
         return (
           <Card inverted="true" key={`route-${route.id}`}>
             <Card.Content>
               <Card.Header>{route.nombre}</Card.Header>
-              <Card.Description>
-                Ruta re cheta
-                <strong>La mas mejor</strong>
-              </Card.Description>
             </Card.Content>
             <Card.Content extra>
               <div className="ui two buttons">
@@ -58,11 +57,7 @@ const RoutesList = ({routesList = []}) => {
     </Card.Group>
   );
 
-  return (
-    <div>
-      {routes.length && renderRoutes()}
-    </div>
-  );
+  return <div>{routes.length && renderRoutes()}</div>;
 };
 
 export default RoutesList;
