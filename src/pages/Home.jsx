@@ -183,7 +183,7 @@ export const Home = () => {
           <Icon name="remove" /> Cancelar
         </Button>
         <Button
-          color="green"
+          primary
           onClick={handleSubmit}
           loading={loadingSubmitButton}
         >
