@@ -104,6 +104,10 @@ export const RouteDetail = () => {
     document.getElementById("uploadXls").click();
   };
 
+  const handleClickResetFile = () => {
+    setNewRoutes([]);
+  }
+
   const handleFileUpload = (event) => {
     let fileObj = event.target.files[0];
     setUploadingFile(true);
@@ -207,11 +211,11 @@ export const RouteDetail = () => {
     <Modal size="small" open={showAssignModalClients}>
       <Header content="Asignar clientes a la ruta" />
       <Modal.Content>
-        <div>
+        <div className="action-container space-between">
           <Button
             icon
             basic
-            color="green"
+            primary
             labelPosition="left"
             onClick={handleClickFileUpload}
             loading={uploadingFile}
@@ -219,10 +223,22 @@ export const RouteDetail = () => {
             <Icon name="file excel" />
             Subir archivo xlsx
           </Button>
+          <Button
+            icon
+            basic
+            secondary
+            labelPosition="left"
+            onClick={handleClickResetFile}
+            disabled={!newRoutes.length}
+          >
+            <Icon name="erase" />
+            Limpiar archivo
+          </Button>
         </div>
         <input
           id="uploadXls"
           type="file"
+          accept=".xls,.xlsx"
           hidden
           onChange={handleFileUpload}
           style={{ padding: "10px" }}
@@ -238,7 +254,7 @@ export const RouteDetail = () => {
           ) : !showErrorUploading ? (
             <Header icon>
               <Icon name="excel file outline" />
-              Aqui podrá ver una vista resumida de los datos a subir
+              Aqui podrá ver una vista resumida del archivo a subir
             </Header>
           ) : (
             <Header icon>
@@ -255,7 +271,7 @@ export const RouteDetail = () => {
         </Button>
         <Button
           disabled={!newRoutes || !newRoutes.length}
-          color="green"
+          primary
           onClick={handleSubmitAssignClients}
           loading={loadingSubmitAssignClientsButton}
         >

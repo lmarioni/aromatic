@@ -72,7 +72,9 @@ p > span {
         opacity: 1;
     }
 }
-
+.space-between{
+    justify-content: space-between !important;
+}
 .action-container {
     display: flex;
     flex-direction: row;
