@@ -19,6 +19,7 @@ import Cookies from "js-cookie";
 import AssignClientsModal from "../modals/Clients/AssignClients";
 import TableSettingsModal from "../modals/Clients/TableSettings";
 import { searchInArr } from "../utils";
+import PrintBillingModal from "../modals/Billing";
 
 let defaultColumns = [
   { display: true, key: "cif", label: "cif" },
@@ -44,6 +45,7 @@ export const RouteDetail = () => {
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [showAssignModalClients, setShowAssignModalClients] = useState(false);
+  const [showPrintBillingModal, setShowPrintBillingModal] = useState(false);
   const [showTableSettings, setShowTableSettings] = useState(false);
   const [columns, setColumns] = useState([]);
   const [searchValue, setSearchValue] = useState("");
@@ -118,6 +120,10 @@ export const RouteDetail = () => {
     setFilteredClients(new_clients);
   };
 
+  const handleClosePrintBilling = () => {
+    setShowPrintBillingModal(false);
+  }
+
   const handleCloseTableSettings = (newColumns = []) => {
     if (newColumns && newColumns.length) {
       setColumns(newColumns);
@@ -159,17 +165,29 @@ export const RouteDetail = () => {
     return (
       <div>
         <Grid>
-          <Grid.Column floated="left">
-            <Input
+          <Grid.Column floated="left" width={5}>
+          <Input
               icon="search"
-              placeholder="Clientes"
+              placeholder="Filtrado de clientes"
               value={searchValue}
               onChange={(e, data) => {
                 handleSearchValue(data);
               }}
             />
           </Grid.Column>
+          <Grid.Column floated="right" width={5}>
+          <Button
+              primary
+              disabled={!clients || !clients.length}
+              onClick={() => {
+                setShowPrintBillingModal(true);
+              }}
+            >
+              Imprimir facturas
+            </Button>
+          </Grid.Column>
         </Grid>
+
         <Table size="small" celled selectable>
           <Table.Header>
             <Table.Row>
@@ -209,6 +227,11 @@ export const RouteDetail = () => {
 
   return (
     <div>
+      <PrintBillingModal 
+        open={showPrintBillingModal}
+        clients={filteredClients}
+        onClose={handleClosePrintBilling}
+      />
       <TableSettingsModal
         columns={columns}
         open={showTableSettings}
@@ -239,7 +262,7 @@ export const RouteDetail = () => {
             </Button>
           </Grid.Column>
           <Grid.Column width={4}>
-            <Button primary>Asignar reparto</Button>
+            {/* <Button primary>Asignar reparto</Button> */}
           </Grid.Column>
           <Grid.Column floated="right" width={4}>
             <Button

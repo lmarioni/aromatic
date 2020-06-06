@@ -25,7 +25,7 @@ const TableSettingsModal = ({ open, onClose, columns }) => {
   return (
     <Modal open={open} size="tiny" closeOnDocumentClick={true}>
       <Modal.Header>Configuración de tabla</Modal.Header>
-      <Modal.Content textAlign="center" scrolling>
+      <Modal.Content scrolling>
         <Table basic celled collapsing>
           <Table.Header>
             <Table.Row>
