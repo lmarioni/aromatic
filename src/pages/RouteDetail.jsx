@@ -12,12 +12,13 @@ import {
   Table,
   Divider,
   Grid,
-  Input
+  Input,
 } from "semantic-ui-react";
 import { useLocation } from "@reach/router";
 import Cookies from "js-cookie";
 import AssignClientsModal from "../modals/Clients/AssignClients";
 import TableSettingsModal from "../modals/Clients/TableSettings";
+import { searchInArr } from "../utils";
 
 let defaultColumns = [
   { display: true, key: "cif", label: "cif" },
@@ -41,6 +42,7 @@ export const RouteDetail = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState([]);
+  const [filteredClients, setFilteredClients] = useState([]);
   const [showAssignModalClients, setShowAssignModalClients] = useState(false);
   const [showTableSettings, setShowTableSettings] = useState(false);
   const [columns, setColumns] = useState([]);
@@ -92,17 +94,28 @@ export const RouteDetail = () => {
       .then((res) => res.json())
       .then((response) => {
         setClients(response);
+        setFilteredClients(response);
         setLoading(false);
       });
   };
 
   const handleSearchValue = ({ value }) => {
+    setLoading(true);
     setSearchValue(value);
+    const searchedClients = searchInArr(clients, value);
+    if (searchedClients.length) {
+      setFilteredClients(searchedClients);
+      setLoading(false);
+    } else {
+      setFilteredClients(clients);
+      setLoading(false);
+    }
   };
 
   const mergeRoutes = (newRoutes = []) => {
     const new_clients = clients.concat(newRoutes);
     setClients(new_clients);
+    setFilteredClients(new_clients);
   };
 
   const handleCloseTableSettings = (newColumns = []) => {
@@ -146,9 +159,10 @@ export const RouteDetail = () => {
     return (
       <div>
         <Grid>
-          <Grid.Column floated="left" width={5}>
+          <Grid.Column floated="left">
             <Input
-              placeholder="Búsque clientes"
+              icon="search"
+              placeholder="Clientes"
               value={searchValue}
               onChange={(e, data) => {
                 handleSearchValue(data);
@@ -172,7 +186,7 @@ export const RouteDetail = () => {
           </Table.Header>
 
           <Table.Body>
-            {clients.map((client) => {
+            {filteredClients.map((client) => {
               return (
                 <Table.Row key={`client${client.id}row`}>
                   {columns.map((column) => {
