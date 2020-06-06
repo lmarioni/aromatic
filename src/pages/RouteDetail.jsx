@@ -122,7 +122,7 @@ export const RouteDetail = () => {
 
   const handleClosePrintBilling = () => {
     setShowPrintBillingModal(false);
-  }
+  };
 
   const handleCloseTableSettings = (newColumns = []) => {
     if (newColumns && newColumns.length) {
@@ -163,10 +163,10 @@ export const RouteDetail = () => {
 
   const renderClients = () => {
     return (
-      <div>
+      <Container textAlign="center">
         <Grid>
-          <Grid.Column floated="left" width={5}>
-          <Input
+          <Grid.Column width={4} floated="left">
+            <Input
               icon="search"
               placeholder="Filtrado de clientes"
               value={searchValue}
@@ -175,8 +175,8 @@ export const RouteDetail = () => {
               }}
             />
           </Grid.Column>
-          <Grid.Column floated="right" width={5}>
-          <Button
+          <Grid.Column width={4} floated="right">
+            <Button
               primary
               disabled={!clients || !clients.length}
               onClick={() => {
@@ -221,13 +221,13 @@ export const RouteDetail = () => {
             })}
           </Table.Body>
         </Table>
-      </div>
+      </Container>
     );
   };
 
   return (
     <div>
-      <PrintBillingModal 
+      <PrintBillingModal
         open={showPrintBillingModal}
         clients={filteredClients}
         onClose={handleClosePrintBilling}

@@ -20,7 +20,7 @@ export const NavBar = () => {
   };
 
   return (
-    <Menu fixed={fixed ? "top" : null} inverted  primary size="large">
+    <Menu fixed={fixed ? "top" : null} inverted primary size="large">
       <Container>
         <Menu.Item
           as="a"
