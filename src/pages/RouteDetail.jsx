@@ -14,35 +14,78 @@ import {
   Grid,
   Modal,
   Message,
+  Checkbox,
 } from "semantic-ui-react";
 import { useLocation } from "@reach/router";
 import { ExcelRenderer } from "react-excel-renderer";
+import Cookies from "js-cookie";
+
+let defaultColumns = [
+  { display: true, key: "cif", label: "cif" },
+  { display: true, key: "cpostal", label: "cpostal" },
+  { display: true, key: "nombreFantasia", label: "nombreFantasia" },
+  { display: true, key: "localidad", label: "localidad" },
+  { display: true, key: "direccion", label: "direccion" },
+  { display: false, key: "idruta", label: "idruta" },
+  { display: false, key: "codigo", label: "codigo" },
+  { display: false, key: "nombre", label: "nombre" },
+  { display: false, key: "apellido", label: "apellido" },
+  { display: false, key: "cpostal", label: "cpostal" },
+  { display: false, key: "provincia", label: "provincia" },
+  { display: false, key: "telefono", label: "telefono" },
+  { display: false, key: "telefono2", label: "telefono2" },
+  { display: false, key: "email", label: "email" },
+];
 
 export const RouteDetail = () => {
+  const [id, setId] = useState(0);
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
+  const [loadingSettingsModal, setLoadingSettingsModal] = useState(false);
   const [clients, setClients] = useState([]);
   const [showAssignModalClients, setShowAssignModalClients] = useState(false);
-  const [
-    loadingSubmitAssignClientsButton,
-    setLoadingSubmitAssignClientsButton,
-  ] = useState(false);
+  const [showTableSettings, setShowTableSettings] = useState(false);
+
+  const [loadingButton, setLoadingButton] = useState(false);
   const [showErrorUploading, setShowErrorUploading] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [newRoutes, setNewRoutes] = useState([]);
   const [collapsedInfo, setCollapsedInfo] = useState(true);
+  const [columns, setColumns] = useState([]);
 
   const params = useLocation().search.substr(1).split("&");
+
+  const handleUpdateCookieColumns = (newValue) => {
+    Cookies.set("columns", newValue);
+  };
 
   useEffect(function () {
     if (params && params.length) {
       const routeId = params[0].split("=")[1];
       const query = params.length > 1 ? params[1].split("=")[1] : "";
       if (routeId) {
+        setId(parseInt(routeId));
         fetchRoute({ id: routeId, q: query });
       }
     }
+
+    const cachedColumns = Cookies.get("columns");
+    if (!cachedColumns) {
+      console.log({ defaultColumns });
+      setColumns(defaultColumns);
+    } else {
+      setColumns(JSON.parse(cachedColumns));
+    }
   }, []);
+
+  useEffect(
+    function () {
+      if (columns.length) {
+        handleUpdateCookieColumns(columns);
+      }
+    },
+    [columns]
+  );
 
   const fetchRoute = ({ id = 0, q = "" }) => {
     setLoading(true);
@@ -62,7 +105,7 @@ export const RouteDetail = () => {
   };
 
   const handleSubmitAssignClients = async () => {
-    setLoadingSubmitAssignClientsButton(true);
+    setLoadingButton(true);
     const requestOptions = {
       method: "POST",
       headers: new Headers({
@@ -72,33 +115,51 @@ export const RouteDetail = () => {
       }),
       body: JSON.stringify(newRoutes),
     };
+
     const response = await fetch(
       `${process.env.REACT_APP_BASE_URL}/clientes`,
       requestOptions
     );
+
     const parsedResponse = await response.json();
 
     if (parsedResponse.status === "success") {
-      setLoadingSubmitAssignClientsButton(false);
+      setLoadingButton(false);
       setShowAssignModalClients(false);
       const allClients = clients;
       allClients.concat(newRoutes);
       handleCloseAssignClientsModal();
     } else {
       setShowAssignModalClients(false);
-      setLoadingSubmitAssignClientsButton(false);
+      setLoadingButton(false);
     }
+  };
+
+  const mergeRoutes = (newRoutes) => {
+    const new_clients = clients.concat(newRoutes);
+    setNewRoutes(new_clients);
+  };
+
+  const handleCloseTableSettings = () => {
+    handleUpdateCookieColumns(columns);
+    setShowTableSettings(false);
   };
 
   const handleCloseAssignClientsModal = () => {
     resetForm();
     setCollapsedInfo(true);
     setUploadingFile(false);
+    mergeRoutes(newRoutes);
     setNewRoutes([]);
     setShowAssignModalClients(false);
   };
 
   const handleAssignClientsModal = () => setShowAssignModalClients(true);
+  const handleManageTableSettings = () => setShowTableSettings(true);
+
+  const handleSaveChangedColumns = () => {
+    handleCloseTableSettings();
+  };
 
   const handleClickFileUpload = () => {
     document.getElementById("uploadXls").click();
@@ -106,7 +167,7 @@ export const RouteDetail = () => {
 
   const handleClickResetFile = () => {
     setNewRoutes([]);
-  }
+  };
 
   const handleFileUpload = (event) => {
     let fileObj = event.target.files[0];
@@ -120,7 +181,8 @@ export const RouteDetail = () => {
         const header = resp.rows.shift();
         const newRoutesParsed = resp.rows.map((routeRow) => {
           return {
-            idruta: routeRow[0],
+            idruta: id,
+            codigo: routeRow[0],
             nombreFantasia: routeRow[1],
             nombre: routeRow[2],
             apellido: routeRow[3],
@@ -140,7 +202,8 @@ export const RouteDetail = () => {
   };
 
   const resetForm = () => {
-    console.log("reset");
+    setCollapsedInfo(true);
+    setNewRoutes([]);
   };
 
   const renderNoClients = () => (
@@ -179,8 +242,8 @@ export const RouteDetail = () => {
             newRoutes.map((newRoute, index) => {
               return (
                 <Table.Row
-                  key={`rowNewRoute${newRoute.idruta}`}
-                  hidden={index > 10 && collapsedInfo}
+                  key={`rowRoute${newRoute.idruta}-${index}`}
+                  hidden={index > 6 && collapsedInfo}
                 >
                   <Table.Cell>
                     <Header as="h4">
@@ -201,16 +264,78 @@ export const RouteDetail = () => {
             setCollapsedInfo(false);
           }}
         >
-          Ver mas
+          Ver más
         </Message>
       )}
     </div>
   );
 
+  const handleToggleDisplay = (data, index) => {
+    console.log({ data, index });
+    const newColumns = columns;
+    newColumns[index].display = !newColumns[index].display;
+    setColumns(newColumns);
+    setLoadingSettingsModal(false);
+
+    // console.log(changedIndex);
+    // const newColumns = columns;
+    // newColumns[changedIndex].display = !newColumns[changedIndex].display;
+    // setColumns(newColumns);
+    //handleUpdateCookieColumns(columns);
+  };
+
+  const renderModalTableSettings = () => (
+    <Modal open={showTableSettings} size="tiny" closeOnDocumentClick={true}>
+      <Modal.Header>Configuración de tabla</Modal.Header>
+      <Modal.Content textAlign="center" scrolling>
+        {loadingSettingsModal ? (
+          <Dimmer active inverted>
+            <Loader inverted>Cargando columnas</Loader>
+          </Dimmer>
+        ) : (
+          <Table basic celled collapsing>
+            <Table.Header>
+              <Table.Row>
+                <Table.HeaderCell>Mostrar columna</Table.HeaderCell>
+                <Table.HeaderCell>Columna</Table.HeaderCell>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {columns.map((column, index) => {
+                return (
+                  <Table.Row key={`column-[${column.label}]-${index}`}>
+                    <Table.Cell>
+                      <Checkbox
+                        onClick={(event, data) => {
+                          setLoadingSettingsModal(true);
+                          handleToggleDisplay(data, index);
+                        }}
+                        disabled={index < 4}
+                        defaultChecked={column.display}
+                        label="Mostrar columna"
+                        slider
+                      />
+                    </Table.Cell>
+                    <Table.Cell collapsing>{column.label}</Table.Cell>
+                  </Table.Row>
+                );
+              })}
+            </Table.Body>
+          </Table>
+        )}
+      </Modal.Content>
+      <Modal.Actions>
+        <Button basic onClick={handleCloseTableSettings}>
+          Cerrar
+        </Button>
+      </Modal.Actions>
+    </Modal>
+  );
+
   const renderModalAssignClients = () => (
     <Modal size="small" open={showAssignModalClients}>
       <Header content="Asignar clientes a la ruta" />
-      <Modal.Content>
+      <Modal.Content scrolling>
         <div className="action-container space-between">
           <Button
             icon
@@ -273,7 +398,7 @@ export const RouteDetail = () => {
           disabled={!newRoutes || !newRoutes.length}
           primary
           onClick={handleSubmitAssignClients}
-          loading={loadingSubmitAssignClientsButton}
+          loading={loadingButton}
         >
           <Icon name="checkmark" /> Guardar cambios
         </Button>
@@ -283,21 +408,18 @@ export const RouteDetail = () => {
 
   const renderClients = () => {
     return (
-      <Table celled selectable>
+      <Table size="small" celled selectable>
         <Table.Header>
           <Table.Row>
-            <Table.HeaderCell>id</Table.HeaderCell>
-            <Table.HeaderCell>cif</Table.HeaderCell>
-            <Table.HeaderCell>cpostal</Table.HeaderCell>
-            <Table.HeaderCell>nombreFantasia</Table.HeaderCell>
-            <Table.HeaderCell>nombre</Table.HeaderCell>
-            <Table.HeaderCell>apellido</Table.HeaderCell>
-            <Table.HeaderCell>direccion</Table.HeaderCell>
-            <Table.HeaderCell>email</Table.HeaderCell>
-            <Table.HeaderCell>localidad</Table.HeaderCell>
-            <Table.HeaderCell>telefono</Table.HeaderCell>
-            <Table.HeaderCell>telefono2</Table.HeaderCell>
-            <Table.HeaderCell>userid</Table.HeaderCell>
+            {columns.map((column, index) => {
+              if (column.display) {
+                return (
+                  <Table.HeaderCell key={`main-column-${column}-${index}`}>
+                    {column.label}
+                  </Table.HeaderCell>
+                );
+              }
+            })}
           </Table.Row>
         </Table.Header>
 
@@ -305,18 +427,15 @@ export const RouteDetail = () => {
           {clients.map((client) => {
             return (
               <Table.Row key={`client${client.id}row`}>
-                <Table.Cell>{client.id}</Table.Cell>
-                <Table.Cell>{client.cif}</Table.Cell>
-                <Table.Cell>{client.cpostal}</Table.Cell>
-                <Table.Cell>{client.nombreFantasia}</Table.Cell>
-                <Table.Cell>{client.nombre}</Table.Cell>
-                <Table.Cell>{client.apellido}</Table.Cell>
-                <Table.Cell>{client.direccion}</Table.Cell>
-                <Table.Cell>{client.email}</Table.Cell>
-                <Table.Cell>{client.localidad}</Table.Cell>
-                <Table.Cell>{client.telefono}</Table.Cell>
-                <Table.Cell>{client.telefono2}</Table.Cell>
-                <Table.Cell>{client.userid}</Table.Cell>
+                {columns.map((column) => {
+                  if (column.display) {
+                    return (
+                      <Table.Cell key={`${client.id}[${column.label}]`}>
+                        {client[column.key]}
+                      </Table.Cell>
+                    );
+                  }
+                })}
               </Table.Row>
             );
           })}
@@ -327,6 +446,7 @@ export const RouteDetail = () => {
 
   return (
     <div>
+      {renderModalTableSettings()}
       {renderModalAssignClients()}
       <Container style={{ marginTop: "7em" }} textAlign="center">
         <Header as="h1" inverted textAlign="center">
@@ -334,9 +454,18 @@ export const RouteDetail = () => {
         </Header>
         <Grid>
           <Grid.Column floated="left" width={4}>
-            <Button primary>Imprimir facturas</Button>
+            <Button
+              icon
+              labelPosition="left"
+              primary
+              disabled={!clients || !clients.length}
+              onClick={handleManageTableSettings}
+            >
+              <Icon name="setting" />
+              Configurar tabla
+            </Button>
           </Grid.Column>
-          <Grid.Column floated="center" width={4}>
+          <Grid.Column width={4}>
             <Button primary>Asignar reparto</Button>
           </Grid.Column>
           <Grid.Column floated="right" width={4}>
