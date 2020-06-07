@@ -15,7 +15,7 @@ export const NavBar = () => {
   }, []);
 
   const handleRedirect = (path = "") => {
-    if (currentRoute !== "") {
+    if (currentRoute !== path) {
       window.location.href = `./${path}`;
     }
   };

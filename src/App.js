@@ -18,12 +18,12 @@ const App = () => {
     <Suspense fallback={<div />}>
       <NavBar />
       <Router>
-        <NotFound default />
+        <NotFound path="404" />
         <NotRegister path="/no-registrado" />
         <Login path="/auth" />
         {!isAuth && <Redirect noThrow from="/" to="/no-registrado" />}
         {!isAuth && <NotRegister default path="/no-registrado" />}
-        <Home path="/inicio" />
+        <Home path="/inicio" default />
         <Products path="/productos" />
         <Clients path="/clientes" />
         <RouteDetail path="/detalles-ruta" />
