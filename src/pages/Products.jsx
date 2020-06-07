@@ -1,5 +1,15 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Segment, Header, Icon, Container, Grid, Divider, Button } from "semantic-ui-react";
+import {
+  Segment,
+  Header,
+  Icon,
+  Container,
+  Grid,
+  Divider,
+  Button,
+  Dimmer,
+  Loader,
+} from "semantic-ui-react";
 import { Context } from "../Context";
 import ProductList from "../components/ProductList";
 
@@ -20,13 +30,13 @@ export const Products = () => {
       }),
     };
 
-    // fetch(`${process.env.REACT_APP_BASE_URL}/rutas/`, data)
-    //   .then((res) => res.json())
-    //   .then((response) => {
-    //     setProductsList(response);
-    //     setLoading(false);
-    //   });
-    setLoading(false);
+    fetch(`${process.env.REACT_APP_BASE_URL}/productos/`, data)
+      .then((res) => res.json())
+      .then((response) => {
+        setProducts(response);
+        setLoading(false);
+      });
+    
   };
 
   const renderNoProducts = () => (
@@ -37,7 +47,14 @@ export const Products = () => {
           Parece que no hay productos cargados
         </Header>
         <Segment.Inline>
-          <Button primary onClick={()=>{console.log('abrir modal ?')}}>Crear producto</Button>
+          <Button
+            primary
+            onClick={() => {
+              console.log("abrir modal ?");
+            }}
+          >
+            Crear producto
+          </Button>
         </Segment.Inline>
       </Segment>
     </div>
@@ -59,7 +76,12 @@ export const Products = () => {
         </Header>
         <Grid>
           <Grid.Column floated="left" width={5}>
-            <Button primary onClick={()=>{console.log('abrir modal ?')}}>
+            <Button
+              primary
+              onClick={() => {
+                console.log("abrir modal ?");
+              }}
+            >
               Crear nuevo producto
             </Button>
           </Grid.Column>
