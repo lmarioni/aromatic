@@ -16,12 +16,12 @@ import {
 } from "semantic-ui-react";
 import RoutesList from "../components/RoutesList";
 
-
 export const Home = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
   const [loadingSubmitButton, setLoadingSubmitButton] = useState(false);
   const [routeName, setRouteName] = useState("");
+  const [routeObservation, setRouteObservation] = useState("");
   const [routesList, setRoutesList] = useState([]);
   const [message, setMessage] = useState({});
   const [showMessage, setShowMessage] = useState(false);
@@ -116,7 +116,9 @@ export const Home = () => {
           Parece que no hay rutas cargadas
         </Header>
         <Segment.Inline>
-          <Button primary>Crear ruta</Button>
+          <Button primary onClick={handleOpenModal}>
+            Crear ruta
+          </Button>
         </Segment.Inline>
       </Segment>
     </div>
@@ -144,17 +146,23 @@ export const Home = () => {
               placeholder="Ingrese aquí el nombre para la nueva ruta"
             />
           </Form.Field>
+          <Form.Field>
+            <label>Observación</label>
+            <input
+              value={routeObservation}
+              onChange={(e) => setRouteObservation(e.target.value)}
+              name="routeObservation"
+              type="text"
+              placeholder="Ingrese aquí si la hubiese una observación para la nueva ruta"
+            />
+          </Form.Field>
         </Form>
       </Modal.Content>
       <Modal.Actions>
         <Button basic onClick={handleCloseModal}>
           <Icon name="remove" /> Cancelar
         </Button>
-        <Button
-          primary
-          onClick={handleSubmit}
-          loading={loadingSubmitButton}
-        >
+        <Button primary onClick={handleSubmit} loading={loadingSubmitButton}>
           <Icon name="checkmark" /> Guardar
         </Button>
       </Modal.Actions>

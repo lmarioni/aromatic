@@ -8,6 +8,8 @@ import { Login } from "./pages/Login";
 import { Home } from "./pages/Home";
 import { NavBar } from "./components/NavBar";
 import { RouteDetail } from "./pages/RouteDetail";
+import { Products } from "./pages/Products";
+import { Clients } from "./pages/Clients";
 
 const App = () => {
   const { isAuth } = useContext(Context);
@@ -17,12 +19,14 @@ const App = () => {
       <NavBar />
       <Router>
         <NotFound default />
-        <NotRegister path="/not-register" />
+        <NotRegister path="/no-registrado" />
         <Login path="/auth" />
-        {!isAuth && <Redirect noThrow from="/" to="/not-register" />}
-        {!isAuth && <NotRegister default path="/not-register" />}
+        {!isAuth && <Redirect noThrow from="/" to="/no-registrado" />}
+        {!isAuth && <NotRegister default path="/no-registrado" />}
         <Home path="/inicio" />
-        <RouteDetail path="/route-details" />
+        <Products path="/productos" />
+        <Clients path="/clientes" />
+        <RouteDetail path="/detalles-ruta" />
       </Router>
     </Suspense>
   );
