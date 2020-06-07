@@ -1,20 +1,10 @@
 import React, { useContext, useState, useEffect } from "react";
-import {
-  Card,
-  Image,
-  Button,
-  Dimmer,
-  Loader,
-  Header,
-  Segment,
-  Icon,
-} from "semantic-ui-react";
+import { Card, Button } from "semantic-ui-react";
 import { Context } from "../../Context";
 import "./styles.scss";
 
 const RoutesList = ({ routesList = [] }) => {
   const { token } = useContext(Context);
-  const [loading, setLoading] = useState(false);
   const [routes, setRoutes] = useState([]);
 
   useEffect(
@@ -27,7 +17,7 @@ const RoutesList = ({ routesList = [] }) => {
   );
 
   const redirect = (id = 0) => {
-    window.location.href = `./route-details?i=${id}`;
+    window.location.href = `./detalles-ruta?i=${id}`;
   };
 
   const renderRoutes = () => (
