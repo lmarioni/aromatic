@@ -28,7 +28,7 @@ export const Clients = () => {
       }),
     };
 
-    // fetch(`${process.env.REACT_APP_BASE_URL}/rutas/`, data)
+    // fetch(`${process.env.REACT_APP_BASE_URL}/clientes/`, data)
     //   .then((res) => res.json())
     //   .then((response) => {
     //     setClientsList(response);
