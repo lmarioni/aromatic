@@ -21,7 +21,7 @@ const App = () => {
         <Login path="/auth" />
         {!isAuth && <Redirect noThrow from="/" to="/not-register" />}
         {!isAuth && <NotRegister default path="/not-register" />}
-        <Home path="/" />
+        <Home path="/inicio" />
         <RouteDetail path="/route-details" />
       </Router>
     </Suspense>
