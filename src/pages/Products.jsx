@@ -12,10 +12,14 @@ import {
 } from "semantic-ui-react";
 import { Context } from "../Context";
 import ProductList from "../components/ProductList";
+import ProductCreationModal from "../modals/Products";
 
 export const Products = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
+  const [showProductCreationModal, setShowProductCreationModal] = useState(
+    false
+  );
   const [products, setProducts] = useState([]);
 
   useEffect(function () {
@@ -36,9 +40,19 @@ export const Products = () => {
         setProducts(response);
         setLoading(false);
       });
-    
   };
 
+  const mergeProducts = (newProduct = {}) => {
+    const new_products = products.concat(newProduct);
+    setProducts(new_products);
+  };
+
+  const handleCloseProductCreationModal = (newProduct = {}) => {
+    if (Object.keys(newProduct).length) {
+      mergeProducts(newProduct);
+    }
+    setShowProductCreationModal(false);
+  };
   const renderNoProducts = () => (
     <div>
       <Segment placeholder textAlign="center">
@@ -70,6 +84,10 @@ export const Products = () => {
 
   return (
     <div>
+      <ProductCreationModal
+        open={showProductCreationModal}
+        onClose={handleCloseProductCreationModal}
+      />
       <Container style={{ marginTop: "7em" }} textAlign="center">
         <Header as="h1" inverted textAlign="center">
           Productos
@@ -79,7 +97,7 @@ export const Products = () => {
             <Button
               primary
               onClick={() => {
-                console.log("abrir modal ?");
+                setShowProductCreationModal(true);
               }}
             >
               Crear nuevo producto

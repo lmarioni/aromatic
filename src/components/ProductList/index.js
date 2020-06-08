@@ -29,7 +29,7 @@ const ProductList = ({ productList = [] }) => {
             precio: prod.precio,
             precioCosto: prod.precioCosto,
             userid: prod.userid,
-            iva: prod.iva.texto,
+            iva: prod.iva?.texto,
           };
         });
         setProducts(parsedProducts);
