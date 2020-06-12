@@ -10,7 +10,6 @@ export const NavBar = () => {
   useEffect(function () {
     const route =
       params && params.length ? params[params.length - 1].split("?")[0] : "";
-      console.log(route);
     setCurrentRoute(route);
   }, []);
 
