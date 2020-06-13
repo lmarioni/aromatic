@@ -12,6 +12,7 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
     function () {
       if (open && clients.length) {
         console.log(clients);
+        ///configuracion/facturas
       }
     },
     [open]
