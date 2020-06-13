@@ -4,6 +4,11 @@ html,
 body {
     background-color: #252839 !important;
 }
+
+th, td{
+    text-transform: capitalize !important;
+}
+
 p {
     align-content: center;
     background-color: #495285;
