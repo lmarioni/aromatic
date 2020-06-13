@@ -27,6 +27,9 @@ let defaultColumns = [
   { display: true, key: "nombreFantasia", label: "nombreFantasia" },
   { display: true, key: "localidad", label: "localidad" },
   { display: true, key: "direccion", label: "direccion" },
+  { display: true, key: "nombreproducto", label: "producto" },
+  { display: true, key: "precio", label: "precio" },
+  { display: true, key: "cantidad", label: "cantidad" },
   { display: false, key: "idruta", label: "idruta" },
   { display: false, key: "codigo", label: "codigo" },
   { display: false, key: "nombre", label: "nombre" },
@@ -43,6 +46,7 @@ export const RouteDetail = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState([]);
+  const [products, setProducts] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [showAssignModalClients, setShowAssignModalClients] = useState(false);
   const [showPrintBillingModal, setShowPrintBillingModal] = useState(false);
@@ -61,7 +65,7 @@ export const RouteDetail = () => {
       const query = params.length > 1 ? params[1].split("=")[1] : "";
       if (routeId) {
         setId(parseInt(routeId));
-        fetchRoute({ id: routeId, q: query });
+        fetchData({ id: routeId, q: query });
       }
     }
 
@@ -83,22 +87,50 @@ export const RouteDetail = () => {
     [columns]
   );
 
-  const fetchRoute = ({ id = 0, q = "" }) => {
+  const fetchData = async ({ id = 0, q = "" }) => {
     setLoading(true);
     const data = {
-      headers: new Headers({
-        Authorization: "Bearer " + token,
-      }),
+      headers: new Headers({ Authorization: "Bearer " + token }),
     };
+    const prodArr = await (await fetchProducts(data)).json();
+    setProducts(prodArr);
+    const clientsArr = await (await fetchClients({ data, id, q })).json();
+    console.log(prodArr);
+    const parsedClients = clientsArr.map((client) => {
+      client.idproducto = prodArr[0].id;
+      client.nombreproducto = prodArr[0].nombre;
+      client.precio = prodArr[0].precio;
+      client.precioCosto = prodArr[0].precioCosto;
+      client.cantidad = 0;
+      return client;
+    });
+    setClients(parsedClients);
+    setFilteredClients(parsedClients);
+    setLoading(false);
+  };
+
+  const fetchProducts = async (data = null) => {
+    if (!data) {
+      data = {
+        headers: new Headers({ Authorization: "Bearer " + token }),
+      };
+    }
+    return fetch(`${process.env.REACT_APP_BASE_URL}/productos/`, data);
+  };
+
+  const fetchClients = async ({ data = null, id, q }) => {
+    if (!data) {
+      data = {
+        headers: new Headers({ Authorization: "Bearer " + token }),
+      };
+    }
+
     let parsedParams = `idruta=${id}`;
     parsedParams = q ? `${parsedParams}&q=${q}` : parsedParams;
-    fetch(`${process.env.REACT_APP_BASE_URL}/clientes?${parsedParams}`, data)
-      .then((res) => res.json())
-      .then((response) => {
-        setClients(response);
-        setFilteredClients(response);
-        setLoading(false);
-      });
+    return fetch(
+      `${process.env.REACT_APP_BASE_URL}/clientes?${parsedParams}`,
+      data
+    );
   };
 
   const handleSearchValue = ({ value }) => {
