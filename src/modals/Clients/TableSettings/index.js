@@ -47,11 +47,11 @@ const TableSettingsModal = ({ open, onClose, columns }) => {
                     <Table.Cell>
                       <Checkbox
                         onClick={(event, data) => {
-                          if (index > 3) {
-                            handleToggleDisplay(data, index);
+                          if (index > 1) {
+                          handleToggleDisplay(data, index);
                           }
                         }}
-                        disabled={index < 4}
+                        disabled={index < 2}
                         defaultChecked={column.display}
                         label="Mostrar columna"
                         slider
