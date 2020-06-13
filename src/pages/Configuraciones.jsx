@@ -12,7 +12,7 @@ import {
     Form,
   } from "semantic-ui-react";
 
-export const Facturas = () => {
+export const Configuraciones = () => {
     return (
         <Container style={{ marginTop: "7em" }} textAlign="center">
         <Header as="h1" inverted textAlign="center">

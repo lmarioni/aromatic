@@ -10,7 +10,7 @@ import { NavBar } from "./components/NavBar";
 import { RouteDetail } from "./pages/RouteDetail";
 import { Products } from "./pages/Products";
 import { Clients } from "./pages/Clients";
-import { Facturas } from "./pages/Facturas";
+import { Configuraciones } from "./pages/Configuraciones";
 
 const App = () => {
   const { isAuth } = useContext(Context);
@@ -25,12 +25,12 @@ const App = () => {
         {!isAuth && <Redirect noThrow from="/" to="/no-registrado" />}
         {!isAuth && <Redirect noThrow from="/inicio" to="/no-registrado" />}
         {!isAuth && <Redirect noThrow from="/clientes" to="/no-registrado" />}
-        {!isAuth && <Redirect noThrow from="/facturas" to="/no-registrado" />}
+        {!isAuth && <Redirect noThrow from="/configuraciones" to="/no-registrado" />}
         {!isAuth && <NotRegister default path="/no-registrado" />}
         <Home path="/inicio" default />
         <Products path="/productos" />
         <Clients path="/clientes" />
-        <Facturas path="/facturas" />
+        <Configuraciones path="/configuraciones" />
         <RouteDetail path="/detalles-ruta" />
       </Router>
     </Suspense>

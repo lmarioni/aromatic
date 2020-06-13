@@ -53,12 +53,12 @@ export const NavBar = () => {
         </Menu.Item>
         <Menu.Item
           as="a"
-          active={currentRoute === "facturas"}
+          active={currentRoute === "configuraciones"}
           onClick={() => {
-            setCurrentRoute("facturas");
+            setCurrentRoute("configuraciones");
           }}
         >
-          <Link to="/facturas"> Facturas </Link>
+          <Link to="/configuraciones"> Configuraciones </Link>
         </Menu.Item>
       </Container>
     </Menu>
