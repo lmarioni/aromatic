@@ -14,6 +14,7 @@ import {
   Grid,
   Label,
   Input,
+  Checkbox,
 } from "semantic-ui-react";
 import { useLocation } from "@reach/router";
 import Cookies from "js-cookie";
@@ -116,7 +117,7 @@ export const RouteDetail = () => {
       client.nombreproducto = prodArr[0].nombre;
       client.precio = prodArr[0].precio;
       client.precioCosto = prodArr[0].precioCosto;
-      client.facturar = "Si";
+      client.facturar = true;
       return client;
     });
     setClients(parsedClients);
@@ -321,9 +322,18 @@ export const RouteDetail = () => {
                           key={`row-${client.id}[${column.label}]`}
                           className={`${column.key}`}
                         >
-                          {column.key === "nombreproducto"
-                            ? renderProductInTable(client, client[column.key])
-                            : client[column.key]}
+                          {column.key === "nombreproducto" ? (
+                            renderProductInTable(client, client[column.key])
+                          ) : column.key === "facturar" ? (
+                            <Checkbox
+                              disabled
+                              defaultChecked={true}
+                              label="Facturar"
+                              slider
+                            />
+                          ) : (
+                            client[column.key]
+                          )}
                         </Table.Cell>
                       );
                     }
