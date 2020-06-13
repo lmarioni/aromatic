@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import {Link} from '@reach/router'
 import { Container, Menu } from "semantic-ui-react";
 
 export const NavBar = () => {
@@ -49,6 +50,15 @@ export const NavBar = () => {
           }}
         >
           Clientes
+        </Menu.Item>
+        <Menu.Item
+          as="a"
+          active={currentRoute === "facturas"}
+          onClick={() => {
+            setCurrentRoute("facturas");
+          }}
+        >
+          <Link to="/facturas"> Facturas </Link>
         </Menu.Item>
       </Container>
     </Menu>
