@@ -5,7 +5,8 @@ body {
     background-color: #252839 !important;
 }
 
-th, td{
+th,
+td {
     text-transform: capitalize !important;
 }
 
@@ -69,6 +70,12 @@ p > span {
         color: blue;
     }
 }
+.precio,
+.precioCosto {
+    &:before {
+        content: "\20AC";
+    }
+}
 
 .faded-text {
     opacity: 0;
@@ -77,7 +84,7 @@ p > span {
         opacity: 1;
     }
 }
-.space-between{
+.space-between {
     justify-content: space-between !important;
 }
 .action-container {
