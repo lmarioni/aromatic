@@ -76,6 +76,9 @@ const ProductCreationModal = ({ id, open, onClose, search = false }) => {
     setIvaSelected(null);
     setLoadingButton(false);
     setNewProduct([]);
+    setFilteredResults([]);
+    setSearchValue("");
+    setLoadingSearch(false);
   };
 
   const handleCloseProductCreationModal = (product = {}) => {
