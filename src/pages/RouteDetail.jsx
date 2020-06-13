@@ -12,6 +12,7 @@ import {
   Table,
   Divider,
   Grid,
+  Label,
   Input,
 } from "semantic-ui-react";
 import { useLocation } from "@reach/router";
@@ -20,16 +21,18 @@ import AssignClientsModal from "../modals/Clients/AssignClients";
 import TableSettingsModal from "../modals/Clients/TableSettings";
 import { searchInArr } from "../utils";
 import PrintBillingModal from "../modals/Billing";
+import ProductCreationModal from "../modals/Products";
 
 let defaultColumns = [
   { display: true, key: "cif", label: "cif" },
-  { display: true, key: "cpostal", label: "cpostal" },
   { display: true, key: "nombreFantasia", label: "nombreFantasia" },
-  { display: true, key: "localidad", label: "localidad" },
   { display: true, key: "direccion", label: "direccion" },
+  { display: true, key: "localidad", label: "localidad" },
   { display: true, key: "nombreproducto", label: "producto" },
   { display: true, key: "precio", label: "precio" },
-  { display: true, key: "cantidad", label: "cantidad" },
+  { display: true, key: "precioCosto", label: "precio costo" },
+  { display: true, key: "facturar", label: "facturar" },
+  { display: true, key: "cpostal", label: "cpostal" },
   { display: false, key: "idruta", label: "idruta" },
   { display: false, key: "codigo", label: "codigo" },
   { display: false, key: "nombre", label: "nombre" },
@@ -47,11 +50,13 @@ export const RouteDetail = () => {
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState([]);
   const [products, setProducts] = useState([]);
+  const [showProductModal, setShowProductModal] = useState(false);
   const [filteredClients, setFilteredClients] = useState([]);
   const [showAssignModalClients, setShowAssignModalClients] = useState(false);
   const [showPrintBillingModal, setShowPrintBillingModal] = useState(false);
   const [showTableSettings, setShowTableSettings] = useState(false);
   const [columns, setColumns] = useState([]);
+  const [clientToAddProduct, setClientToAddProduct] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const params = useLocation().search.substr(1).split("&");
 
@@ -74,7 +79,18 @@ export const RouteDetail = () => {
     if (!cachedColumns) {
       setColumns(defaultColumns);
     } else {
-      setColumns(JSON.parse(cachedColumns));
+      const parsedCachedColumns = JSON.parse(cachedColumns);
+      const newColumns = defaultColumns.map((col, index) => {
+        if (
+          parsedCachedColumns[index] &&
+          parsedCachedColumns[index].key === col.key &&
+          parsedCachedColumns[index].label === col.label
+        ) {
+          col.display = parsedCachedColumns[index].display;
+        }
+        return col;
+      });
+      setColumns(newColumns);
     }
   }, []);
 
@@ -95,13 +111,12 @@ export const RouteDetail = () => {
     const prodArr = await (await fetchProducts(data)).json();
     setProducts(prodArr);
     const clientsArr = await (await fetchClients({ data, id, q })).json();
-    console.log(prodArr);
     const parsedClients = clientsArr.map((client) => {
-      client.idproducto = prodArr[0].id;
+      client.idproducto = [prodArr[0].id];
       client.nombreproducto = prodArr[0].nombre;
       client.precio = prodArr[0].precio;
       client.precioCosto = prodArr[0].precioCosto;
-      client.cantidad = 0;
+      client.facturar = "Si";
       return client;
     });
     setClients(parsedClients);
@@ -168,6 +183,66 @@ export const RouteDetail = () => {
     mergeRoutes(newRoutes);
     setShowAssignModalClients(false);
   };
+
+  const handleCloseProductModal = (newProduct = {}) => {
+    if (
+      Object.keys(newProduct).length &&
+      Object.keys(clientToAddProduct).length
+    ) {
+      const newClients = clients.map((client) => {
+        if (client.id === clientToAddProduct.id) {
+          if (
+            client.idproducto.find(
+              (eachId) => parseInt(eachId) === parseInt(newProduct.id)
+            )
+          ) {
+            const splitedNames = client.nombreproducto
+              .split(",")
+              .map((eachName) => {
+                const splitedProdName = eachName.split("x");
+                const nombre = splitedProdName[0];
+                if (nombre === newProduct.nombre) {
+                  const cantidad = splitedProdName[1]
+                    ? parseInt(splitedProdName[1]) + 1
+                    : 2;
+                  eachName = `${nombre}x${cantidad}`;
+                }
+
+                return eachName;
+              });
+            client.nombreproducto = `${splitedNames.join()}`;
+          } else {
+            client.idproducto.push(newProduct.id);
+            client.nombreproducto = `${client.nombreproducto},${newProduct.nombre}`;
+          }
+          client.precio = parseInt(client.precio) + parseInt(newProduct.precio);
+          client.precioCosto =
+            parseInt(client.precioCosto) + parseInt(newProduct.precioCosto);
+        }
+        return client;
+      });
+      setClients(newClients);
+      setFilteredClients(newClients);
+    }
+    setShowProductModal(false);
+  };
+
+  const renderProductInTable = (client = {}, productName = "") => (
+    <Button as="div" labelPosition="left">
+      <Label as="a" basic>
+        {productName}
+      </Label>
+      <Button
+        icon
+        onClick={() => {
+          setClientToAddProduct(client);
+          setShowProductModal(true);
+        }}
+      >
+        <Icon name="plus" />
+      </Button>
+    </Button>
+  );
 
   const renderNoClients = () => (
     <Segment secondary textAlign="center" style={{ marginTop: "7em" }}>
@@ -242,8 +317,13 @@ export const RouteDetail = () => {
                   {columns.map((column) => {
                     if (column.display) {
                       return (
-                        <Table.Cell key={`${client.id}[${column.label}]`}>
-                          {client[column.key]}
+                        <Table.Cell
+                          key={`row-${client.id}[${column.label}]`}
+                          className={`${column.key}`}
+                        >
+                          {column.key === "nombreproducto"
+                            ? renderProductInTable(client, client[column.key])
+                            : client[column.key]}
                         </Table.Cell>
                       );
                     }
@@ -259,6 +339,11 @@ export const RouteDetail = () => {
 
   return (
     <div>
+      <ProductCreationModal
+        search={true}
+        open={showProductModal}
+        onClose={handleCloseProductModal}
+      />
       <PrintBillingModal
         open={showPrintBillingModal}
         clients={filteredClients}
