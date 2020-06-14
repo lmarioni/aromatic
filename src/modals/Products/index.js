@@ -7,16 +7,15 @@ import {
   Modal,
   Form,
   Grid,
-  Loader,
-  Tab,
-  Search,
-  Item,
+  Loader
 } from "semantic-ui-react";
 import { Context } from "../../Context";
-import "./styles.scss";
-import { debounce } from "../../utils";
 
-const ProductCreationModal = ({ id, open, onClose, search = false }) => {
+const ProductCreationModal = ({
+  id,
+  open,
+  onClose
+}) => {
   const { token } = useContext(Context);
   const [newProduct, setNewProduct] = useState([]);
   const [loadingButton, setLoadingButton] = useState(false);
@@ -29,10 +28,6 @@ const ProductCreationModal = ({ id, open, onClose, search = false }) => {
   const [iva, setIva] = useState(null);
   const [ivaSelected, setIvaSelected] = useState(null);
   const [ivaList, setIvaList] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [filteredResults, setFilteredResults] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
-  const [loadingSearch, setLoadingSearch] = useState(false);
 
   useEffect(function () {
     fetchIva();
@@ -55,17 +50,6 @@ const ProductCreationModal = ({ id, open, onClose, search = false }) => {
       });
   };
 
-  const fetchProducts = async (q = "") => {
-    const data = {
-      headers: new Headers({ Authorization: "Bearer " + token }),
-    };
-
-    return fetch(
-      `${process.env.REACT_APP_BASE_URL}/productos${q ? `?q=${q}` : "/"}`,
-      data
-    );
-  };
-
   const resetForm = () => {
     setCodigo("");
     setNombre("");
@@ -76,9 +60,6 @@ const ProductCreationModal = ({ id, open, onClose, search = false }) => {
     setIvaSelected(null);
     setLoadingButton(false);
     setNewProduct([]);
-    setFilteredResults([]);
-    setSearchValue("");
-    setLoadingSearch(false);
   };
 
   const handleCloseProductCreationModal = (product = {}) => {
@@ -128,55 +109,6 @@ const ProductCreationModal = ({ id, open, onClose, search = false }) => {
       setIvaSelected(ivaFound);
     }
   };
-
-  const handleSelected = (product) => {
-    handleCloseProductCreationModal(product);
-  };
-
-  const handleSearchChange = async (value) => {
-    setLoadingSearch(true);
-    setSearchValue(value);
-    const prods = await (await fetchProducts(value)).json();
-    setFilteredResults(prods);
-    setLoadingSearch(false);
-  };
-
-  const resultRenderer = ({
-    codigo,
-    descripcion,
-    id,
-    nombre,
-    precio,
-    precioCosto,
-    iva,
-    userid,
-  }) => (
-    <Item>
-      <Item.Content>
-        <Item.Header as="a">{nombre}</Item.Header>
-        <Item.Description>{descripcion}</Item.Description>
-        <Item.Extra>Precio ${precio}</Item.Extra>
-      </Item.Content>
-    </Item>
-  );
-
-  const renderSearchProduct = () => (
-    <Search
-      fluid
-      loading={loadingSearch}
-      results={filteredResults}
-      onSearchChange={(e, { value }) => {
-        debounce(handleSearchChange(value), 200);
-      }}
-      onResultSelect={(e, { result }) => {
-        handleSelected(result);
-      }}
-      resultRenderer={resultRenderer}
-      value={searchValue}
-      showNoResults={false}
-      noResultsMessage="Producto no encontrado"
-    />
-  );
 
   const renderNewProduct = () => (
     <Form>
@@ -293,43 +225,10 @@ const ProductCreationModal = ({ id, open, onClose, search = false }) => {
     </Form>
   );
 
-  const handleTabChange = (e, { activeIndex }) => {
-    setActiveIndex(activeIndex);
-  };
-
-  const panes = [
-    {
-      menuItem: "Buscar producto",
-      render: () => (
-        <Tab.Pane className="customPane">{renderSearchProduct()}</Tab.Pane>
-      ),
-    },
-    {
-      menuItem: "Crear producto",
-      render: () => (
-        <Tab.Pane className="customPane">{renderNewProduct()}</Tab.Pane>
-      ),
-    },
-  ];
-
-  const renderSearchTab = () => (
-    <Tab
-      activeIndex={activeIndex}
-      onTabChange={handleTabChange}
-      panes={panes}
-    />
-  );
-
   const renderModal = () => (
     <Modal size="small" open={open}>
-      <Header
-        content={
-          search ? "Búsqueda / Creación de producto" : "Creación de producto"
-        }
-      />
-      <Modal.Content scrolling>
-        {search ? renderSearchTab() : renderNewProduct()}
-      </Modal.Content>
+      <Header content="Creación de producto" />
+      <Modal.Content scrolling>{renderNewProduct()}</Modal.Content>
       <Modal.Actions>
         <Button
           basic
@@ -339,20 +238,14 @@ const ProductCreationModal = ({ id, open, onClose, search = false }) => {
         >
           <Icon name="remove" /> Cancelar
         </Button>
-        {(!search || activeIndex === 1) && (
-          <Button
-            primary
-            onClick={handleSubmit}
-            loading={loadingButton}
-            disabled={
-              !search || activeIndex === 1
-                ? !precioCosto || !nombre || !precio || !iva
-                : true
-            }
-          >
-            <Icon name="checkmark" /> Guardar producto
-          </Button>
-        )}
+        <Button
+          primary
+          onClick={handleSubmit}
+          loading={loadingButton}
+          disabled={!precioCosto || !nombre || !precio || !iva}
+        >
+          <Icon name="checkmark" /> Guardar producto
+        </Button>
       </Modal.Actions>
     </Modal>
   );
