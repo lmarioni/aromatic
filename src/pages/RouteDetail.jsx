@@ -22,7 +22,7 @@ import AssignClientsModal from "../modals/Clients/AssignClients";
 import TableSettingsModal from "../modals/Clients/TableSettings";
 import { searchInArr } from "../utils";
 import PrintBillingModal from "../modals/Billing";
-import ProductCreationModal from "../modals/Products";
+import SearchProductModal from "../modals/SearchProducts";
 
 let defaultColumns = [
   { display: true, key: "cif", label: "cif" },
@@ -113,6 +113,7 @@ export const RouteDetail = () => {
     setProducts(prodArr);
     const clientsArr = await (await fetchClients({ data, id, q })).json();
     const parsedClients = clientsArr.map((client) => {
+      client.productos = [{ producto: prodArr[0], cantidad: 1 }];
       client.idproducto = [prodArr[0].id];
       client.nombreproducto = prodArr[0].nombre;
       client.precio = prodArr[0].precio;
@@ -185,49 +186,66 @@ export const RouteDetail = () => {
     setShowAssignModalClients(false);
   };
 
-  const handleCloseProductModal = (newProduct = {}) => {
-    if (
-      Object.keys(newProduct).length &&
-      Object.keys(clientToAddProduct).length
-    ) {
+  const handleCloseProductModal = (newProductList = []) => {
+    if (newProductList.length && Object.keys(clientToAddProduct).length) {
       const newClients = clients.map((client) => {
         if (client.id === clientToAddProduct.id) {
+          client.productos = [...newProductList];
+          client.nombreproducto = newProductList.reduce(
+            (nombre, { producto, cantidad }) =>
+              nombre + `${producto.nombre}(x${cantidad}) - `,
+            ""
+          );
           if (
-            client.idproducto.find(
-              (eachId) => parseInt(eachId) === parseInt(newProduct.id)
-            )
+            client.nombreproducto.charAt(
+              client.nombreproducto.trim().length - 1
+            ) === "-"
           ) {
-            const splitedNames = client.nombreproducto
-              .split(",")
-              .map((eachName) => {
-                const splitedProdName = eachName.split("x");
-                const nombre = splitedProdName[0];
-                if (nombre === newProduct.nombre) {
-                  const cantidad = splitedProdName[1]
-                    ? parseInt(splitedProdName[1]) + 1
-                    : 2;
-                  eachName = `${nombre}x${cantidad}`;
-                }
-
-                return eachName;
-              });
-            client.nombreproducto = `${splitedNames.join()}`;
-          } else {
-            client.idproducto.push(newProduct.id);
-            client.nombreproducto = `${client.nombreproducto},${newProduct.nombre}`;
+            client.nombreproducto = client.nombreproducto.trim().slice(0, -1);
           }
-          client.precio = parseInt(client.precio) + parseInt(newProduct.precio);
-          client.precioCosto =
-            parseInt(client.precioCosto) + parseInt(newProduct.precioCosto);
+
+          client.precio = newProductList.reduce(
+            (sum, { producto, cantidad }) => sum + producto.precio,
+            0
+          );
+          client.precioCosto = newProductList.reduce(
+            (sum, { producto, cantidad }) => sum + producto.precioCosto,
+            0
+          );
+          client.facturar = true;
         }
         return client;
       });
       setClients(newClients);
       setFilteredClients(newClients);
     }
+    setSearchValue("");
     setShowProductModal(false);
   };
 
+  const handleToggleBilling = (client = {}) => {
+    setLoading(true);
+    const newFilteredClients = filteredClients.map((filteredClient) => {
+      if (filteredClient.id === client.id) {
+        const newFacturar = filteredClient.facturar ? false : true;
+        filteredClient.facturar = newFacturar;
+      }
+      return filteredClient;
+    });
+    setFilteredClients(newFilteredClients);
+    setLoading(false);
+  };
+
+  const renderBillCheckbox = (client = {}) => (
+    <Checkbox
+      defaultChecked={true}
+      onClick={() => {
+        handleToggleBilling(client);
+      }}
+      label={client.facturar ? "Facturar" : "No facturar"}
+      slider
+    />
+  );
   const renderProductInTable = (client = {}, productName = "") => (
     <Button as="div" labelPosition="left">
       <Label as="a" basic>
@@ -240,7 +258,7 @@ export const RouteDetail = () => {
           setShowProductModal(true);
         }}
       >
-        <Icon name="plus" />
+        <Icon name="edit" />
       </Button>
     </Button>
   );
@@ -322,18 +340,11 @@ export const RouteDetail = () => {
                           key={`row-${client.id}[${column.label}]`}
                           className={`${column.key}`}
                         >
-                          {column.key === "nombreproducto" ? (
-                            renderProductInTable(client, client[column.key])
-                          ) : column.key === "facturar" ? (
-                            <Checkbox
-                              disabled
-                              defaultChecked={true}
-                              label="Facturar"
-                              slider
-                            />
-                          ) : (
-                            client[column.key]
-                          )}
+                          {column.key === "nombreproducto"
+                            ? renderProductInTable(client, client[column.key])
+                            : column.key === "facturar"
+                            ? renderBillCheckbox(client)
+                            : client[column.key]}
                         </Table.Cell>
                       );
                     }
@@ -349,8 +360,8 @@ export const RouteDetail = () => {
 
   return (
     <div>
-      <ProductCreationModal
-        search={true}
+      <SearchProductModal
+        client={clientToAddProduct}
         open={showProductModal}
         onClose={handleCloseProductModal}
       />

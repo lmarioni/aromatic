@@ -79,24 +79,15 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
       facturas: clients.map((client) => {
         if (client.facturar) {
           const bill = { to: client.id };
-          const multiplesItems = client.nombreproducto.split(",");
-          let items = [];
-          if (multiplesItems.length > 1) {
-            items = multiplesItems.map((fullItem, index) => {
-              const cantidad = fullItem.split("x")[1]
-                ? fullItem.split("x")[1]
-                : 1;
-              const idproducto = client.idproducto[index];
-              return { cantidad, idproducto };
-            });
-          } else {
-            const cantidad = client.nombreproducto.split("x")[1]
-              ? client.nombreproducto.split("x")[1]
-              : 1;
-            const idproducto = client.idproducto[0];
-            items = [{ cantidad, idproducto }];
-          }
+          const items = client.productos.map(({ producto, cantidad }) => {
+            return {
+              cantidad: cantidad,
+              idproducto: producto.id,
+            };
+          });
+
           bill.items = items;
+          
           return bill;
         }
       }),

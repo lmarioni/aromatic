@@ -13,53 +13,62 @@ import {
   Transition,
   List,
   Item,
+  Container,
 } from "semantic-ui-react";
 import { Context } from "../../Context";
 import "./styles.scss";
 import { debounce } from "../../utils";
 
-const emptyNewProduct = {
-  codigo: "",
-  nombre: "",
-  descripcion: "",
-  precio: 0,
-  precioCosto: 0,
-  iva: null,
-};
-
-const SearchProductModal = ({ id, open, onClose }) => {
+const SearchProductModal = ({ id, open, onClose, client = {} }) => {
   const { token } = useContext(Context);
-  const [newProduct, setNewProduct] = useState(emptyNewProduct);
   const [loadingButton, setLoadingButton] = useState(false);
   const [loading, setLoading] = useState(false);
   const [productList, setProductList] = useState([]);
   const [ivaList, setIvaList] = useState([]);
-  const [filteredResults, setFilteredResults] = useState([]);
+  const [createMode, setCreateMode] = useState(false);
+  const [filteredResults, setFilteredResults] = useState([
+    { title: "", description: "" },
+  ]);
   const [searchValue, setSearchValue] = useState("");
   const [loadingSearch, setLoadingSearch] = useState(false);
-
-  //   const [codigo, setCodigo] = useState("");
-  //   const [nombre, setNombre] = useState("");
-  //   const [descripcion, setDescripcion] = useState("");
-  //   const [precio, setPrecio] = useState(0);
-  //   const [precioCosto, setPrecioCosto] = useState(0);
-  //   const [iva, setIva] = useState(null);
-  //   const [ivaSelected, setIvaSelected] = useState(null);
+  const [ivaSelected, setIvaSelected] = useState(null);
+  const [codigo, setCodigo] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [precio, setPrecio] = useState(0);
+  const [precioCosto, setPrecioCosto] = useState(0);
+  const [iva, setIva] = useState(null);
 
   useEffect(function () {
     fetchIva();
     resetForm();
   }, []);
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      setLoadingSearch(true);
-      const prods = await (await fetchProducts(searchValue)).json();
-      setFilteredResults(prods);
-      setLoadingSearch(false);
-    }, 500);
+  useEffect(
+    function () {
+      if (client && Object.keys(client).length) {
+        const prods = client.productos.map(({ producto, cantidad }, index) => {
+          return {
+            producto: producto,
+            cantidad: parseInt(cantidad),
+          };
+        });
+        setProductList(prods);
+      }
+    },
+    [client]
+  );
 
-    return () => clearTimeout(delayDebounceFn);
+  useEffect(() => {
+    if (searchValue) {
+      const delayDebounceFn = setTimeout(async () => {
+        setLoadingSearch(true);
+        const prods = await (await fetchProducts(searchValue)).json();
+        setFilteredResults(prods);
+        setLoadingSearch(false);
+      }, 500);
+      return () => clearTimeout(delayDebounceFn);
+    }
   }, [searchValue]);
 
   const fetchProducts = async (q = "") => {
@@ -89,38 +98,20 @@ const SearchProductModal = ({ id, open, onClose }) => {
 
   const resetForm = () => {
     setTimeout(0);
+    setSearchValue("");
+    setCreateMode(false);
     setLoadingButton(false);
-    setNewProduct([]);
+    setCodigo("");
+    setNombre("");
+    setDescripcion("");
+    setPrecio(0);
+    setPrecioCosto(0);
+    setIva(null);
   };
 
-  const handleCloseSearchProductModal = (product = {}) => {
+  const handleCloseSearchProductModal = (pList = []) => {
     resetForm();
-    onClose(product);
-  };
-
-  const handleSubmit = async (event) => {
-    setLoadingButton(true);
-    const requestOptions = {
-      method: "POST",
-      headers: new Headers({
-        authorization: `Bearer ${token}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      }),
-      body: JSON.stringify({}),
-    };
-
-    //const response = await fetch( `${process.env.REACT_APP_BASE_URL}/productos`, requestOptions );
-
-    //const parsedResponse = await response.json();
-
-    // if (parsedResponse.status === "success") {
-    //   setLoadingButton(false);
-    //   handleCloseSearchProductModal(parsedResponse.producto);
-    // } else {
-    //   handleCloseSearchProductModal();
-    //   setLoadingButton(false);
-    // }
+    onClose(pList);
   };
 
   const handleIvaChange = (e, { value }) => {
@@ -131,11 +122,90 @@ const SearchProductModal = ({ id, open, onClose }) => {
     }
   };
   const handleSelected = (product) => {
-    console.log("Seleccionadoo: ", product);
+    const newProductList = !productList.find(
+      (prod) => prod.producto.id === product.id
+    )
+      ? [...productList, ...[{ producto: product, cantidad: 1 }]]
+      : productList.map((prod) => {
+          if (prod.producto.id === product.id) {
+            prod.cantidad = parseInt(prod.cantidad) + 1;
+          }
+          return prod;
+        });
+    setProductList(newProductList);
+  };
+
+  const handleCreateNewProductSubmit = async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setLoading(true);
+    setLoadingButton(true);
+    const requestOptions = {
+      method: "POST",
+      headers: new Headers({
+        authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify({
+        codigo: codigo,
+        precioCosto: precioCosto,
+        descripcion: descripcion,
+        nombre: nombre,
+        precio: precio,
+        iva: iva,
+      }),
+    };
+    const response = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/productos`,
+      requestOptions
+    );
+
+    const parsedResponse = await response.json();
+
+    if (parsedResponse.status === "success") {
+      setLoadingButton(false);
+      setLoading(false);
+      setCreateMode(false);
+      handleSelected(parsedResponse.producto);
+    } else {
+      setLoadingButton(false);
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = () => {
+    handleCloseSearchProductModal(productList);
   };
 
   const handleSearchChange = async (value) => {
     setSearchValue(value);
+  };
+
+  const handleAddSameProduct = (prodToRemove) => {
+    const productToAddId = prodToRemove.producto.id;
+    const newProductList = productList.map((prod) => {
+      if (prod.producto.id === productToAddId) {
+        prod.cantidad = prod.cantidad + 1;
+      }
+      return prod;
+    });
+    setProductList(newProductList);
+  };
+  const handleRemoveProduct = (prodToRemove) => {
+    const productToRemove = prodToRemove.producto;
+    const quantity = prodToRemove.cantidad;
+    const newProductList =
+      quantity > 1
+        ? productList.map(({ producto, cantidad }) => {
+            if (producto.id === productToRemove.id) {
+              cantidad = cantidad - 1;
+            }
+            return { producto, cantidad };
+          })
+        : productList.filter((prod) => prod.producto.id !== productToRemove.id);
+
+    setProductList(newProductList);
   };
 
   const resultRenderer = ({
@@ -157,7 +227,7 @@ const SearchProductModal = ({ id, open, onClose }) => {
     </Item>
   );
 
-  const renderSearchProduct = () => (
+  const renderSearchProduct = (title = "") => (
     <Search
       fluid
       loading={loadingSearch}
@@ -168,7 +238,7 @@ const SearchProductModal = ({ id, open, onClose }) => {
       onResultSelect={(e, { result }) => {
         handleSelected(result);
       }}
-      placeholder="Agregar productos creados..."
+      placeholder="Buscar productos..."
       resultRenderer={resultRenderer}
       value={searchValue}
       showNoResults={false}
@@ -177,40 +247,234 @@ const SearchProductModal = ({ id, open, onClose }) => {
   );
   const renderLoading = () => <Loader inverted />;
   const renderModalContent = () => (
-    <Segment placeholder className="modalContent">
-      <Grid columns={2} stackable textAlign="center">
-        <Divider vertical>O</Divider>
-        <Grid.Row verticalAlign="middle">
-          <Grid.Column>{renderSearchProduct()}</Grid.Column>
-          <Grid.Column>
-            <Button primary>Crear uno nuevo</Button>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-      <Grid stackable>
-        <Grid.Row verticalAlign="middle">
-          <Transition.Group
-            as={List}
-            duration={200}
-            divided
-            size="huge"
-            verticalAlign="middle"
-          >
+    <div>
+      <Segment placeholder>
+        <Grid columns={2} stackable textAlign="center">
+          <Divider vertical>O</Divider>
+          <Grid.Row verticalAlign="middle">
+            <Grid.Column>{renderSearchProduct()}</Grid.Column>
+            <Grid.Column>
+              <Button
+                primary
+                disabled={createMode}
+                onClick={() => setCreateMode(true)}
+              >
+                Crear uno nuevo
+              </Button>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      </Segment>
+      {createMode && (
+        <Segment placeholder loading={loading}>
+          <Form>
+            <Grid>
+              <Grid.Row>
+                <Grid.Column width={8}>
+                  <Form.Group inline>
+                    <Form.Field>
+                      <label>Código</label>
+                      <input
+                        value={codigo}
+                        onChange={(e) => setCodigo(e.target.value)}
+                        name="codigo"
+                        type="text"
+                        placeholder="Código para el producto"
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                </Grid.Column>
+                <Grid.Column width={8}>
+                  <Form.Group inline>
+                    <Form.Field>
+                      <label>Nombre</label>
+                      <input
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        name="nombre"
+                        type="text"
+                        placeholder="Nombre para el producto"
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                </Grid.Column>
+              </Grid.Row>
+
+              <Grid.Row>
+                <Grid.Column width={8}>
+                  <Form.Group inline>
+                    <Form.Field>
+                      <label>Precio</label>
+                      <input
+                        value={precio}
+                        onChange={(e) => setPrecio(e.target.value)}
+                        name="precio"
+                        type="number"
+                        min="0"
+                        placeholder="Ingrese aquí el precio para el nuevo producto"
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                </Grid.Column>
+                <Grid.Column width={8}>
+                  <Form.Group inline>
+                    <Form.Field>
+                      <label>Costo</label>
+                      <input
+                        value={precioCosto}
+                        onChange={(e) => setPrecioCosto(e.target.value)}
+                        name="precioCosto"
+                        type="number"
+                        min="0"
+                        placeholder="Ingrese aquí el precio costo para el nuevo producto"
+                      />
+                    </Form.Field>
+                  </Form.Group>
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={8}>
+                  <Form.Group inline>
+                    <label>Iva</label>
+                    {loading ? (
+                      <Loader inverted />
+                    ) : (
+                      ivaList.map((eachIva, index) => {
+                        return (
+                          <div key={`iva-${index}`}>
+                            <Form.Radio
+                              label={eachIva.texto}
+                              value={eachIva.id}
+                              checked={iva === eachIva.id}
+                              onChange={handleIvaChange}
+                            />
+                          </div>
+                        );
+                      })
+                    )}
+                  </Form.Group>
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column width={8}>
+                  <Form.TextArea
+                    label="Descripción"
+                    value={descripcion}
+                    onChange={(e) => setDescripcion(e.target.value)}
+                    placeholder="Descripción del producto"
+                  />
+                </Grid.Column>
+                <Grid.Column width={8}>
+                  <Segment
+                    placeholder
+                    textAlign="center"
+                    style={{ marginTop: "1.5em" }}
+                  >
+                    Precio total percibido por los clientes: $
+                    {ivaSelected !== null && ivaSelected.porcentaje
+                      ? ivaSelected.porcentaje * precio
+                      : precio}
+                  </Segment>
+                </Grid.Column>
+              </Grid.Row>
+              <Grid.Row>
+                <Grid.Column>
+                  <Button
+                    color="green"
+                    floated="right"
+                    onClick={handleCreateNewProductSubmit}
+                    loading={loadingButton}
+                  >
+                    <Icon name="checkmark" /> Guardar producto
+                  </Button>
+                  <Button
+                    basic
+                    floated="right"
+                    onClick={() => {
+                      setCreateMode(false);
+                    }}
+                  >
+                    <Icon name="remove" /> Cancelar
+                  </Button>
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+          </Form>
+        </Segment>
+      )}
+      <Segment placeholder loading={loading}>
+        {productList && productList.length ? (
+          <List divided verticalAlign="middle" animated className="w-100">
             {productList.map((product) => (
-              <List.Item key={product}>
-                <List.Content header={product.nombre} />
+              <List.Item key={product.producto}>
+                <List.Content>
+                  <List.Header as="h5">{`${product.producto.nombre} x ${product.cantidad}`}</List.Header>
+                  <List.Description>
+                    {product.producto.descripcion}
+                    <List>
+                      <List.Item as="h6">
+                        <Icon name="euro" />
+                        <List.Content>
+                          <List.Header>{product.producto.precio}</List.Header>
+                          <List.Description>
+                            Precio actual del producto
+                          </List.Description>
+                        </List.Content>
+                      </List.Item>
+                      <List.Item as="h6">
+                        <Icon name="euro" />
+                        <List.Content>
+                          <List.Header>
+                            {product.producto.precioCosto}
+                          </List.Header>
+                          <List.Description>
+                            Precio costo del producto
+                          </List.Description>
+                        </List.Content>
+                      </List.Item>
+                    </List>
+                  </List.Description>
+                </List.Content>
+                <List.Content floated="right">
+                  <Button
+                    icon
+                    labelPosition="left"
+                    onClick={() => {
+                      handleRemoveProduct(product);
+                    }}
+                  >
+                    <Icon name="minus" />
+                    Quitar producto
+                  </Button>
+                  <Button
+                    icon
+                    labelPosition="right"
+                    onClick={() => {
+                      handleAddSameProduct(product);
+                    }}
+                  >
+                    Agregar otro igual
+                    <Icon name="plus" />
+                  </Button>
+                </List.Content>
               </List.Item>
             ))}
-          </Transition.Group>
-        </Grid.Row>
-      </Grid>
-    </Segment>
+          </List>
+        ) : (
+          <Header icon>
+            <Icon name="search" />
+            No hay productos, recordá que podés agregarlos desde el buscador o
+            desde el botón de crear uno nuevo.
+          </Header>
+        )}
+      </Segment>
+    </div>
   );
 
   const renderModal = () => (
     <Modal size="small" open={open}>
       <Header content="Búsqueda / Creación de producto" />
-      <Modal.Content scrolling>
+      <Modal.Content scrolling className="modalContent">
         {loading ? renderLoading() : renderModalContent()}
       </Modal.Content>
       <Modal.Actions>
@@ -220,9 +484,14 @@ const SearchProductModal = ({ id, open, onClose }) => {
             handleCloseSearchProductModal();
           }}
         >
-          <Icon name="remove" /> Cancelar
+          <Icon name="remove" /> Cerrar
         </Button>
-        <Button primary onClick={handleSubmit} loading={loadingButton}>
+        <Button
+          primary
+          disabled={createMode}
+          onClick={handleSubmit}
+          loading={loadingButton}
+        >
           <Icon name="checkmark" /> Guardar cambios
         </Button>
       </Modal.Actions>
