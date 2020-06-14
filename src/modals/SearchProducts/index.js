@@ -10,10 +10,8 @@ import {
   Loader,
   Divider,
   Search,
-  Transition,
-  List,
   Item,
-  Container,
+  List,
 } from "semantic-ui-react";
 import { Context } from "../../Context";
 import "./styles.scss";
@@ -208,7 +206,7 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
     setProductList(newProductList);
   };
 
-  const resultRenderer = ({
+  const renderSearchResult = ({
     codigo,
     descripcion,
     id,
@@ -218,13 +216,19 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
     iva,
     userid,
   }) => (
-    <Item>
-      <Item.Content>
-        <Item.Header as="a">{nombre}</Item.Header>
-        <Item.Description>{descripcion}</Item.Description>
-        <Item.Extra>Precio ${precio}</Item.Extra>
-      </Item.Content>
-    </Item>
+    <div>
+      {loadingSearch || !nombre ? (
+        <div>Buscando . . . </div>
+      ) : (
+        <Item>
+          <Item.Content>
+            <Item.Header as="a">{nombre}</Item.Header>
+            <Item.Description>{descripcion}</Item.Description>
+            <Item.Extra>Precio ${precio}</Item.Extra>
+          </Item.Content>
+        </Item>
+      )}
+    </div>
   );
 
   const renderSearchProduct = (title = "") => (
@@ -239,9 +243,9 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
         handleSelected(result);
       }}
       placeholder="Buscar productos..."
-      resultRenderer={resultRenderer}
+      resultRenderer={renderSearchResult}
       value={searchValue}
-      showNoResults={false}
+      showNoResults={true}
       noResultsMessage="Producto no encontrado"
     />
   );
