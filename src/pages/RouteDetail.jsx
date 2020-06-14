@@ -205,11 +205,39 @@ export const RouteDetail = () => {
           }
 
           client.precio = newProductList.reduce(
-            (sum, { producto, cantidad }) => sum + producto.precio,
+            (sum, { producto, cantidad }) => sum + parseInt((producto.precio)*cantidad),
             0
           );
           client.precioCosto = newProductList.reduce(
-            (sum, { producto, cantidad }) => sum + producto.precioCosto,
+            (sum, { producto, cantidad }) => sum + parseInt((producto.precioCosto)*cantidad),
+            0
+          );
+          client.facturar = true;
+        }
+        return client;
+      });
+      const newFilteredClients = filteredClients.map((client) => {
+        if (client.id === clientToAddProduct.id) {
+          client.productos = [...newProductList];
+          client.nombreproducto = newProductList.reduce(
+            (nombre, { producto, cantidad }) =>
+              nombre + `${producto.nombre}(x${cantidad}) - `,
+            ""
+          );
+          if (
+            client.nombreproducto.charAt(
+              client.nombreproducto.trim().length - 1
+            ) === "-"
+          ) {
+            client.nombreproducto = client.nombreproducto.trim().slice(0, -1);
+          }
+
+          client.precio = newProductList.reduce(
+            (sum, { producto, cantidad }) => sum + parseInt((producto.precio)*cantidad),
+            0
+          );
+          client.precioCosto = newProductList.reduce(
+            (sum, { producto, cantidad }) => sum + parseInt((producto.precioCosto)*cantidad),
             0
           );
           client.facturar = true;
@@ -217,9 +245,8 @@ export const RouteDetail = () => {
         return client;
       });
       setClients(newClients);
-      setFilteredClients(newClients);
+      setFilteredClients(newFilteredClients);
     }
-    setSearchValue("");
     setShowProductModal(false);
   };
 

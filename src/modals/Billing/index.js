@@ -73,23 +73,23 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
     } else {
       fecha = selectedDate;
     }
+
+    const filteredClients = clients.filter((client) => client.facturar);
+
     const requestBody = {
       fecha,
       serie,
-      facturas: clients.map((client) => {
-        if (client.facturar) {
-          const bill = { to: client.id };
-          const items = client.productos.map(({ producto, cantidad }) => {
-            return {
-              cantidad: cantidad,
-              idproducto: producto.id,
-            };
-          });
+      facturas: filteredClients.map((client) => {
+        const bill = { to: client.id };
+        const items = client.productos.map(({ producto, cantidad }) => {
+          return {
+            cantidad: cantidad,
+            idproducto: producto.id,
+          };
+        });
 
-          bill.items = items;
-          
-          return bill;
-        }
+        bill.items = items;
+        return bill;
       }),
     };
     const requestOptions = {
