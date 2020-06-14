@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Container, Menu } from "semantic-ui-react";
-
+import './styles.scss';
 export const NavBar = () => {
   const [currentRoute, setCurrentRoute] = useState("");
 
@@ -20,7 +20,7 @@ export const NavBar = () => {
   };
 
   return (
-    <Menu fixed={fixed ? "top" : null} pointing inverted secondary size="large">
+    <Menu className="topNavbar" fixed={fixed ? "top" : null} pointing inverted size="large">
       <Container>
         <Menu.Item
           as="a"
