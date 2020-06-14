@@ -16,7 +16,7 @@ const App = () => {
 
   return (
     <Suspense fallback={<div />}>
-      <NavBar />
+      {isAuth && <NavBar />}
       <Router>
         <NotFound path="404" />
         <NotRegister path="/no-registrado" />
