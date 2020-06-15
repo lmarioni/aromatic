@@ -10,20 +10,6 @@ td {
     text-transform: capitalize !important;
 }
 
-p {
-    align-content: center;
-    background-color: #495285;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 6em;
-}
-p > span {
-    opacity: 0.4;
-    text-align: center;
-}
-
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
     color: #007bff;
@@ -137,4 +123,7 @@ p > span {
 }
 .justify-content-evenly {
     justify-content: space-evenly;
+}
+.separatedSegment{
+    padding: 2em 0;
 }
