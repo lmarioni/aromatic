@@ -24,32 +24,19 @@ import { searchInArr } from "../utils";
 import PrintBillingModal from "../modals/Billing";
 import SearchProductModal from "../modals/SearchProducts";
 
-let defaultColumns = [
-  { display: true, key: "cif", label: "cif" },
-  { display: true, key: "nombreFantasia", label: "nombreFantasia" },
-  { display: true, key: "direccion", label: "direccion" },
-  { display: true, key: "localidad", label: "localidad" },
-  { display: true, key: "nombreproducto", label: "producto" },
-  { display: true, key: "precio", label: "precio" },
-  { display: true, key: "precioCosto", label: "precio costo" },
-  { display: true, key: "facturar", label: "facturar" },
-  { display: true, key: "cpostal", label: "cpostal" },
-  { display: false, key: "idruta", label: "idruta" },
-  { display: false, key: "codigo", label: "codigo" },
-  { display: false, key: "nombre", label: "nombre" },
-  { display: false, key: "apellido", label: "apellido" },
-  { display: false, key: "cpostal", label: "cpostal" },
-  { display: false, key: "provincia", label: "provincia" },
-  { display: false, key: "telefono", label: "telefono" },
-  { display: false, key: "telefono2", label: "telefono2" },
-  { display: false, key: "email", label: "email" },
-];
+import "react-dates/initialize";
+import "react-dates/lib/css/_datepicker.css";
+import { SingleDatePicker } from "react-dates";
+
+import { defaultColumns } from "../utils/initColumns";
 
 export const RouteDetail = () => {
   const [id, setId] = useState(0);
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState([]);
+  const [date, setDate] = useState(null);
+  const [dateFocused, setDateFocused] = useState(false);
   const [products, setProducts] = useState([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [filteredClients, setFilteredClients] = useState([]);
@@ -60,6 +47,8 @@ export const RouteDetail = () => {
   const [clientToAddProduct, setClientToAddProduct] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const params = useLocation().search.substr(1).split("&");
+  const [minDate, setMinDate] = useState(null);
+  const [serie, setSerie] = useState(0);
 
   const handleUpdateCookieColumns = (newValue) => {
     Cookies.set("columns", newValue);
@@ -71,6 +60,7 @@ export const RouteDetail = () => {
       const query = params.length > 1 ? params[1].split("=")[1] : "";
       if (routeId) {
         setId(parseInt(routeId));
+        fetchBillingInfo();
         fetchData({ id: routeId, q: query });
       }
     }
@@ -103,6 +93,27 @@ export const RouteDetail = () => {
     },
     [columns]
   );
+
+  const fetchBillingInfo = () => {
+    const data = {
+      headers: new Headers({
+        Authorization: "Bearer " + token,
+      }),
+    };
+
+    fetch(`${process.env.REACT_APP_BASE_URL}/configuracion/facturas`, data)
+      .then((res) => res.json())
+      .then(({ fechaMinina, nserie, numeroFactura }) => {
+        const splitedDate = fechaMinina.split("-");
+        const minDate = new Date(
+          splitedDate[2],
+          splitedDate[1] - 1,
+          splitedDate[0]
+        );
+        setMinDate(minDate);
+        setSerie(nserie);
+      });
+  };
 
   const fetchData = async ({ id = 0, q = "" }) => {
     setLoading(true);
@@ -205,11 +216,13 @@ export const RouteDetail = () => {
           }
 
           client.precio = newProductList.reduce(
-            (sum, { producto, cantidad }) => sum + parseInt((producto.precio)*cantidad),
+            (sum, { producto, cantidad }) =>
+              sum + parseInt(producto.precio * cantidad),
             0
           );
           client.precioCosto = newProductList.reduce(
-            (sum, { producto, cantidad }) => sum + parseInt((producto.precioCosto)*cantidad),
+            (sum, { producto, cantidad }) =>
+              sum + parseInt(producto.precioCosto * cantidad),
             0
           );
           client.facturar = true;
@@ -233,11 +246,13 @@ export const RouteDetail = () => {
           }
 
           client.precio = newProductList.reduce(
-            (sum, { producto, cantidad }) => sum + parseInt((producto.precio)*cantidad),
+            (sum, { producto, cantidad }) =>
+              sum + parseInt(producto.precio * cantidad),
             0
           );
           client.precioCosto = newProductList.reduce(
-            (sum, { producto, cantidad }) => sum + parseInt((producto.precioCosto)*cantidad),
+            (sum, { producto, cantidad }) =>
+              sum + parseInt(producto.precioCosto * cantidad),
             0
           );
           client.facturar = true;
@@ -262,6 +277,21 @@ export const RouteDetail = () => {
     setFilteredClients(newFilteredClients);
     setLoading(false);
   };
+
+  const renderDatePicker = () => (
+    <SingleDatePicker
+      placeholder="Fecha de facturación"
+      block
+      displayFormat={"DD-MM-YYYY"}
+      orientation="vertical"
+      verticalHeight={568}
+      date={date} // momentPropTypes.momentObj or null
+      onDateChange={(newDate) => setDate(newDate)} // PropTypes.func.isRequired
+      focused={dateFocused} // PropTypes.bool
+      onFocusChange={({ focused }) => setDateFocused(focused)} // PropTypes.func.isRequired
+      id="your_unique_id" // PropTypes.string.isRequired,
+    />
+  );
 
   const renderBillCheckbox = (client = {}) => (
     <Checkbox
@@ -328,10 +358,13 @@ export const RouteDetail = () => {
               }}
             />
           </Grid.Column>
-          <Grid.Column width={4} floated="right">
+          <Grid.Column width={5} floated="left">
+            {renderDatePicker()}
+          </Grid.Column>
+          <Grid.Column width={3} floated="right">
             <Button
               primary
-              disabled={!clients || !clients.length}
+              disabled={!clients || !clients.length || !id || !date}
               onClick={() => {
                 setShowPrintBillingModal(true);
               }}
@@ -393,6 +426,8 @@ export const RouteDetail = () => {
         onClose={handleCloseProductModal}
       />
       <PrintBillingModal
+        id={id}
+        date={date}
         open={showPrintBillingModal}
         clients={filteredClients}
         onClose={handleClosePrintBilling}

@@ -1,55 +1,75 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Button, Modal, Segment, Header, Icon, List } from "semantic-ui-react";
-import InfiniteCalendar from "react-infinite-calendar";
+import {
+  Button,
+  Modal,
+  Segment,
+  Header,
+  Icon,
+  List,
+  Grid,
+  Divider,
+} from "semantic-ui-react";
 import "react-infinite-calendar/styles.css";
 import { Context } from "../../Context";
 
-const PrintBillingModal = ({ open, onClose, clients = [] }) => {
+const PrintBillingModal = ({
+  id = null,
+  open,
+  nserie = 0,
+  onClose,
+  clients = [],
+  date = null,
+}) => {
   const { token } = useContext(Context);
-  const [serie, setSerie] = useState(0);
-  const [today, setToday] = useState(new Date());
   const [billsToPrint, setBillsToPrint] = useState([]);
-  const [multiPrint, setMultiPrint] = useState('');
+  const [multiPrint, setMultiPrint] = useState("");
   const [showWarningMessage, setShowWarningMessage] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [minDate, setMinDate] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [loadingButton, setLoadingButton] = useState(false);
+  const [createdBills, setCreatedBills] = useState([]);
+  const [alreadyCreated, setAlreadyCreated] = useState(false);
 
   useEffect(
     function () {
-      if (open && clients.length) {
-        fetchBillingInfo();
+      if (open && clients.length && date && id) {
+        fetchRepeatedBills();
+        //fetchBillingInfo();
       }
     },
     [open]
   );
 
-  const fetchBillingInfo = () => {
+  const fetchRepeatedBills = async () => {
     setLoading(true);
-    const data = {
+    const requestOptions = {
+      method: "POST",
       headers: new Headers({
-        Authorization: "Bearer " + token,
+        authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      }),
+      body: JSON.stringify({
+        fecha: date.format("DD-MM-YYYY"),
+        idruta: id,
       }),
     };
 
-    fetch(`${process.env.REACT_APP_BASE_URL}/configuracion/facturas`, data)
-      .then((res) => res.json())
-      .then(({ fechaMinina, nserie, numeroFactura }) => {
-        const splitedDate = fechaMinina.split("-");
-        const minDate = new Date(
-          splitedDate[2],
-          splitedDate[1] - 1,
-          splitedDate[0]
-        );
-        setMinDate(minDate);
-        setSerie(nserie);
-        setLoading(false);
-      });
+    const response = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/facturas/rutas`,
+      requestOptions
+    );
+
+    const parsedResponse = await response.json();
+    if (!parsedResponse.length) {
+      setLoading(false);
+      handleEmitBill();
+    } else {
+      setLoading(false);
+      setCreatedBills(parsedResponse);
+    }
   };
 
   const handleReset = () => {
-    setSerie(0);
     setToday(new Date());
     setShowWarningMessage(false);
     setLoading(false);
@@ -60,27 +80,16 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
   };
 
   const handleClose = () => {
-    handleReset();
+    //handleReset();
     onClose();
   };
 
   const handleEmitBill = async () => {
-    let fecha = "";
-    if (!selectedDate) {
-      const parsedToday = today.toLocaleDateString().split("/");
-      fecha = `${parseInt(parsedToday[1])}-${parseInt(
-        parsedToday[0]
-      )}-${parseInt(parsedToday[2])}`;
-    } else {
-      fecha = selectedDate;
-    }
-
     const filteredClients = clients.filter((client) => client.facturar);
-
     const requestBody = {
-      idruta: 3,
-      fecha,
-      serie,
+      idruta: id,
+      fecha: date.format("DD-MM-YYYY"),
+      nserie,
       facturas: filteredClients.map((client) => {
         const bill = { to: client.id };
         const items = client.productos.map(({ producto, cantidad }) => {
@@ -106,14 +115,14 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
     if (requestBody.facturas[0]) {
       setLoading(true);
       setLoadingButton(true);
+      setAlreadyCreated(true);
       const response = await fetch(
         `${process.env.REACT_APP_BASE_URL}/facturar`,
         requestOptions
       );
       const parsedResponse = await response.json();
-
-      setMultiPrint(parsedResponse.multi)
-      const billsArray = parsedResponse.invoices.map((bill) => bill.filename);
+      setMultiPrint(parsedResponse.multi);
+      const billsArray = parsedResponse.invoices;
       setBillsToPrint(billsArray);
       setLoadingButton(false);
       setLoading(false);
@@ -121,41 +130,78 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
       setShowWarningMessage(true);
     }
   };
+  const renderCreatedBills = () => (
+    <div>
+      <Segment placeholder>
+        <Header as="h2" textAlign="center">
+          Parece que estas facturas ya se encuentran emitidas.
+        </Header>
+      </Segment>
+      <Segment placeholder>
+        <Grid columns={2} stackable textAlign="center">
+          <Divider vertical>O</Divider>
 
+          <Grid.Row verticalAlign="middle">
+            <Grid.Column>
+              <Header icon>
+                <Icon name="search" />
+                Puede descargarlas nuevamente desde aquí abajo
+              </Header>
+              <List link>
+                {createdBills.map(({ invoices, id, idruta }) => (
+                  <List.Item as="a" href={invoices}>
+                    Ruta {idruta}
+                  </List.Item>
+                ))}
+              </List>
+            </Grid.Column>
+            <Grid.Column>
+              <Header icon>
+                <Icon name="repeat" />
+                <Button
+                  primary
+                  onClick={handleEmitBill}
+                  disabled={alreadyCreated}
+                >
+                  Emitirlas nuevamente
+                </Button>
+              </Header>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      </Segment>
+    </div>
+  );
   const renderPrintBills = () => (
     <React.Fragment>
-       <Segment>
-        Todas las facturas: 
-        <a href={multiPrint} target="_blank">
-                  Imprimir Todas las facturas
-        </a>  
-    </Segment>
-    <Segment color="blue" textAlign="center">
-      <List divided relaxed>
-        {billsToPrint.map((bill, index) => (
-          <List.Item key={`bill-${index}`}>
-            <List.Icon name="print" size="large" verticalAlign="middle" />
-            <List.Content>
-              <Header>
-                <a href={bill} target="_blank">
-                  Imprimir factura
-                </a>
-              </Header>
-              <List.Description as="a">Descripcion de factura</List.Description>
-            </List.Content>
-          </List.Item>
-        ))}
-      </List>
-    </Segment>
+      <Segment>
+        <a href={multiPrint}>Descargar todas las facturas</a>
+      </Segment>
+      <Segment color="blue" textAlign="center">
+        <List divided relaxed>
+          {billsToPrint.map(({ filename, idfactura }, index) => (
+            <List.Item key={`bill-${index}`}>
+              <List.Icon name="print" size="large" verticalAlign="middle" />
+              <List.Content>
+                <Header>
+                  <a href={filename}>Imprimir factura</a>
+                </Header>
+                <List.Description as="a">
+                  Factura número {idfactura}
+                </List.Description>
+              </List.Content>
+            </List.Item>
+          ))}
+        </List>
+      </Segment>
     </React.Fragment>
-   
   );
   const renderWarningMessage = () => (
     <Segment color="blue" textAlign="center">
       <Header icon>
         <Icon name="pdf file outline" />
         Al parecer no hay facturas para emitir, recuerde cambiar la opcion de
-        'Facturar' de la tabla.
+        'Facturar' para cada cliente la tabla.
       </Header>
       <Button primary onClick={handleClose}>
         Volver a la tabla
@@ -163,46 +209,16 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
     </Segment>
   );
   const renderContent = () => (
-    <Segment loading={loading}>
-      <Header as="h2" dividing>
-        Seleccione una fecha para facturar
-      </Header>
-      <InfiniteCalendar
-        displayOptions={{
-          showHeader: false,
-        }}
-        locale={{
-          locale: require("date-fns/locale/es"),
-          headerFormat: "dddd, D MMM",
-          weekdays: ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"],
-          blank: "Seleccione una fecha de facturación",
-          todayLabel: {
-            long: "Hoy",
-            short: "Hoy",
-          },
-        }}
-        onSelect={(date) => {
-          const newDate = date.toLocaleDateString().split("/");
-          const formatedDate = `${newDate[1]}-${newDate[0]}-${newDate[2]}`;
-          setSelectedDate(formatedDate);
-        }}
-        width={"100%"}
-        height={350}
-        rowHeight={70}
-        selected={today}
-        minDate={minDate}
-      />
-    </Segment>
+    <div>
+      {createdBills.length > 0 && renderCreatedBills()}
+      {billsToPrint && billsToPrint.length && renderPrintBills()}
+    </div>
   );
   return (
     <Modal open={open} closeOnDocumentClick={true}>
       <Modal.Header>Imprimir facturas</Modal.Header>
       <Modal.Content scrolling>
-        {!showWarningMessage
-          ? billsToPrint && billsToPrint.length
-            ? renderPrintBills()
-            : renderContent()
-          : renderWarningMessage()}
+        {!showWarningMessage ? renderContent() : renderWarningMessage()}
       </Modal.Content>
       <Modal.Actions>
         {billsToPrint && billsToPrint.length ? null : (
