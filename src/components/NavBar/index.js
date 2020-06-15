@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import {Link} from '@reach/router'
 import { Container, Menu } from "semantic-ui-react";
 import './styles.scss';
 export const NavBar = () => {
@@ -49,6 +50,24 @@ export const NavBar = () => {
         >
           Reportes
         </Menu.Item>
+        <Menu.Item
+          as="a"
+          active={currentRoute === "configuraciones"}
+          onClick={() => {
+            setCurrentRoute("configuraciones");
+          }}
+        >
+          <Link to="/configuraciones"> Configuraciones </Link>
+        </Menu.Item>
+        <Menu.Menu position='right'>
+          <Menu.Item
+            as="a"
+            name='Salir'
+            onClick={() => {
+              handleRedirect("logout");
+            }}
+          />
+        </Menu.Menu>
       </Container>
     </Menu>
   );
