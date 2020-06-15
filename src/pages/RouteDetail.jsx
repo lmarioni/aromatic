@@ -178,11 +178,11 @@ export const RouteDetail = () => {
   const mergeRoutes = (newRoutes = []) => {
     const new_clients = clients.concat(newRoutes);
     const parsedClients = new_clients.map((client) => {
-      client.productos = [{ producto: prodArr[0], cantidad: 1 }];
-      client.idproducto = [prodArr[0].id];
-      client.nombreproducto = prodArr[0].nombre;
-      client.precio = prodArr[0].precio;
-      client.precioCosto = prodArr[0].precioCosto;
+      client.productos = [{ producto: products[0], cantidad: 1 }];
+      client.idproducto = [products[0].id];
+      client.nombreproducto = products[0].nombre;
+      client.precio = products[0].precio;
+      client.precioCosto = products[0].precioCosto;
       client.facturar = true;
       return client;
     });
