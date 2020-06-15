@@ -7,12 +7,18 @@ import {
   Grid,
   Divider,
   Button,
+  Search,
+  Item,
+  List,
+  Dimmer,
+  Loader,
 } from "semantic-ui-react";
 import { Context } from "../Context";
 import ReportList from "../components/ReportList";
 import "react-dates/initialize";
 import "react-dates/lib/css/_datepicker.css";
 import { DateRangePicker } from "react-dates";
+import { debounce } from "../utils";
 
 export const Reports = () => {
   const { token } = useContext(Context);
@@ -22,37 +28,155 @@ export const Reports = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [focusedInput, setFocusedInput] = useState(null);
+  const [loadingButton, setLoadingButton] = useState(false);
+  const [client, setClient] = useState(null);
+  const [filteredResults, setFilteredResults] = useState([
+    { title: "", description: "" },
+  ]);
+  const [searchValue, setSearchValue] = useState("");
+  const [loadingSearch, setLoadingSearch] = useState(false);
 
   useEffect(function () {
-    fetchReports();
+    resetForm();
   }, []);
 
-  const fetchReports = () => {
+  const resetForm = () => {
+    setLoading(false);
+    setReports([]);
+    setToday(new Date());
+    setStartDate(null);
+    setEndDate(null);
+    setFocusedInput(null);
+    setFilteredResults(null);
+    setSearchValue("");
+    setLoadingSearch(false);
+  };
+
+  const fetchReports = async () => {
+    setLoadingButton(true);
     setLoading(true);
-    const data = {
+
+    const requestOptions = {
+      method: "GET",
       headers: new Headers({
-        Authorization: "Bearer " + token,
+        authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
       }),
     };
-    //https://api-aromatic.azurewebsites.net/facturas?desde=05-06-2020&hasta=15-06-2020&idcliente=22
 
-    // fetch(`${process.env.REACT_APP_BASE_URL}/reports/`, data)
-    //   .then((res) => res.json())
-    //   .then((response) => {
-    //     setReportsList(response);
-    //     setLoading(false);
-    //   });
+    const response = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/facturas?desde=${startDate.format(
+        "DD-MM-YYYY"
+      )}&hasta=${startDate.format("DD-MM-YYYY")}${
+        client ? `&idcliente=${client.id}` : ""
+      }`,
+      requestOptions
+    );
+
+    const parsedResponse = await response.json();
+
+    if (parsedResponse && parsedResponse.length) {
+      setReports(parsedResponse);
+      setLoadingButton(false);
+    } else {
+      console.log(parsedResponse);
+      setLoadingButton(false);
+    }
+
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (searchValue) {
+      const delayDebounceFn = setTimeout(async () => {
+        setLoadingSearch(true);
+        const cli = await (await fetchClients(searchValue)).json();
+        const parsedClients = cli.map((client) => {
+          client.title = client.nombreFantasia
+            ? client.nombreFantasia
+            : client.nombre;
+          return client;
+        });
+        setFilteredResults(parsedClients);
+        setLoadingSearch(false);
+      }, 500);
+      return () => clearTimeout(delayDebounceFn);
+    }
+  }, [searchValue]);
+
+  const fetchClients = async (q = "") => {
+    const data = {
+      headers: new Headers({ Authorization: "Bearer " + token }),
+    };
+
+    return fetch(
+      `${process.env.REACT_APP_BASE_URL}/clientes${q ? `?q=${q}` : "/"}`,
+      data
+    );
+  };
+
+  const handleSelected = (clientSelected) => {
+    setClient(clientSelected);
+  };
+
+  const handleSearchChange = async (value) => {
+    setSearchValue(value);
+  };
+
+  const renderDataSelected = () => (
+    <List>
+      <List.Item
+        icon="calendar alternate outline"
+        content={`Fecha inicio ${startDate}`}
+      />
+      <List.Item
+        icon="calendar alternate outline"
+        content={`Fecha fin ${endDate}`}
+      />
+      {client && (
+        <List.Item
+          icon="user"
+          content={`Cliente ${
+            client.nombreFantasia ? client.nombreFantasia : client.nombre
+          }`}
+        />
+      )}
+    </List>
+  );
+
   const renderNoReports = () => (
     <div>
-      <Segment placeholder textAlign="center">
+      <Segment placeholder textAlign="center" loading={loading}>
         <Header icon>
           <Icon name="search" />
           Parece que no hay reportes cargados a la fecha
         </Header>
       </Segment>
+    </div>
+  );
+
+  const renderSearchResult = ({
+    direccion = "",
+    localidad = "",
+    nombre = "",
+    nombreFantasia = "",
+    provincia = "",
+  }) => (
+    <div>
+      {loadingSearch ? (
+        <div>Buscando . . . </div>
+      ) : (
+        <Item>
+          <Item.Content>
+            <Item.Header as="h5">
+              {nombreFantasia ? `${nombreFantasia}(${nombre})` : `${nombre}`}
+            </Item.Header>
+            <Item.Description>{`${direccion}-${localidad}`}</Item.Description>
+            <Item.Extra>{provincia}</Item.Extra>
+          </Item.Content>
+        </Item>
+      )}
     </div>
   );
 
@@ -62,8 +186,55 @@ export const Reports = () => {
     </Dimmer>
   );
 
-  const renderReports = () => <ReportList reportList={reports} />;
+  const renderSearchReports = () => (
+    <Button
+      onClick={fetchReports}
+      icon
+      loading={loadingButton}
+      labelPosition="right"
+      disabled={!startDate || !endDate}
+    >
+      Buscar reportes
+      <Icon name="right arrow" />
+    </Button>
+  );
 
+  const renderDatePicker = () => (
+    <DateRangePicker
+      startDate={startDate} // momentPropTypes.momentObj or null,
+      startDateId="your_unique_start_date_id" // PropTypes.string.isRequired,
+      startDatePlaceholderText="Inicio"
+      endDatePlaceholderText="Fin"
+      endDate={endDate} // momentPropTypes.momentObj or null,
+      endDateId="your_unique_end_date_id" // PropTypes.string.isRequired,
+      onDatesChange={({ startDate, endDate }) => {
+        setClient(null);
+        setStartDate(startDate);
+        setEndDate(endDate);
+      }} // PropTypes.func.isRequired,
+      focusedInput={focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
+      onFocusChange={(fInput) => setFocusedInput(fInput)} // PropTypes.func.isRequired,
+    />
+  );
+  const renderReports = () => <ReportList reportList={reports} />;
+  const renderSearchClient = (title = "") => (
+    <Search
+      fluid
+      loading={loadingSearch}
+      results={filteredResults}
+      onSearchChange={(e, { value }) => {
+        debounce(handleSearchChange(value), 50);
+      }}
+      onResultSelect={(e, { result }) => {
+        handleSelected(result);
+      }}
+      placeholder="Buscar clientes..."
+      resultRenderer={renderSearchResult}
+      value={searchValue}
+      showNoResults={true}
+      noResultsMessage="Cliente no encontrado"
+    />
+  );
   return (
     <div>
       <Container style={{ marginTop: "7em" }} textAlign="center">
@@ -71,31 +242,25 @@ export const Reports = () => {
           Reportes
         </Header>
         <Grid>
-          <Grid.Column width={3} floated="left">
-            <div>Col 1</div>
+          <Grid.Column width={5} floated="left">
+            {renderDatePicker()}
           </Grid.Column>
-          <Grid.Column width={6} floated="left">
-            <DateRangePicker
-              startDate={startDate} // momentPropTypes.momentObj or null,
-              startDateId="your_unique_start_date_id" // PropTypes.string.isRequired,
-              startDatePlaceholderText="Inicio"
-              endDatePlaceholderText="Fin"
-              endDate={endDate} // momentPropTypes.momentObj or null,
-              endDateId="your_unique_end_date_id" // PropTypes.string.isRequired,
-              onDatesChange={({ startDate, endDate }) => {
-                setStartDate(startDate);
-                setEndDate(endDate);
-              }} // PropTypes.func.isRequired,
-              focusedInput={focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
-              onFocusChange={(fInput) => setFocusedInput(fInput)} // PropTypes.func.isRequired,
-            />
+          <Grid.Column width={4} floated="left">
+            {renderSearchClient()}
           </Grid.Column>
           <Grid.Column width={3} floated="right">
-            <div>Col 3</div>
+            {renderSearchReports()}
           </Grid.Column>
         </Grid>
         <Divider />
-
+        <div className="separatedSegment">
+          <Segment color="blue">
+            {startDate === null || endDate === null
+              ? `Recuerde completar la fecha de inicio y de fin para la búsqueda. 
+        El cliente es opcional.`
+              : renderDataSelected()}
+          </Segment>
+        </div>
         {loading
           ? renderLoading()
           : reports.length
