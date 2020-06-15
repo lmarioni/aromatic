@@ -13,10 +13,10 @@ import {
   Dimmer,
   Loader,
 } from "semantic-ui-react";
-import { Context } from "../Context";
-import ReportList from "../components/ReportList";
 import "react-dates/initialize";
 import "react-dates/lib/css/_datepicker.css";
+import { Context } from "../Context";
+import ReportList from "../components/ReportList";
 import { DateRangePicker } from "react-dates";
 import { debounce } from "../utils";
 
@@ -201,6 +201,7 @@ export const Reports = () => {
 
   const renderDatePicker = () => (
     <DateRangePicker
+      displayFormat={"DD-MM-YYYY"}
       startDate={startDate} // momentPropTypes.momentObj or null,
       startDateId="your_unique_start_date_id" // PropTypes.string.isRequired,
       startDatePlaceholderText="Inicio"
@@ -216,6 +217,7 @@ export const Reports = () => {
       onFocusChange={(fInput) => setFocusedInput(fInput)} // PropTypes.func.isRequired,
     />
   );
+
   const renderReports = () => <ReportList reportList={reports} />;
   const renderSearchClient = (title = "") => (
     <Search
