@@ -109,7 +109,7 @@ export const Configuraciones = () => {
                 />
                 <small>
                   Si cambia el numero de serie, sus próximas facturas sandrán
-                  con este numero de seria
+                  con este numero de serie
                 </small>
               </div>
               {
