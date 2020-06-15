@@ -60,7 +60,7 @@ export const NavBar = () => {
           as="a"
           active={currentRoute === "configuraciones"}
           onClick={() => {
-            setCurrentRoute("configuraciones");
+            handleRedirect("configuraciones");
           }}
         >
           Configuraciones
