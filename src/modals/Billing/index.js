@@ -9,6 +9,7 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
   const [serie, setSerie] = useState(0);
   const [today, setToday] = useState(new Date());
   const [billsToPrint, setBillsToPrint] = useState([]);
+  const [multiPrint, setMultiPrint] = useState('');
   const [showWarningMessage, setShowWarningMessage] = useState(false);
   const [loading, setLoading] = useState(false);
   const [minDate, setMinDate] = useState(null);
@@ -77,6 +78,7 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
     const filteredClients = clients.filter((client) => client.facturar);
 
     const requestBody = {
+      idruta: 3,
       fecha,
       serie,
       facturas: filteredClients.map((client) => {
@@ -109,7 +111,9 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
         requestOptions
       );
       const parsedResponse = await response.json();
-      const billsArray = parsedResponse.map((bill) => bill.filename);
+
+      setMultiPrint(parsedResponse.multi)
+      const billsArray = parsedResponse.invoices.map((bill) => bill.filename);
       setBillsToPrint(billsArray);
       setLoadingButton(false);
       setLoading(false);
@@ -119,6 +123,13 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
   };
 
   const renderPrintBills = () => (
+    <React.Fragment>
+       <Segment>
+        Todas las facturas: 
+        <a href={multiPrint} target="_blank">
+                  Imprimir Todas las facturas
+        </a>  
+    </Segment>
     <Segment color="blue" textAlign="center">
       <List divided relaxed>
         {billsToPrint.map((bill, index) => (
@@ -136,6 +147,8 @@ const PrintBillingModal = ({ open, onClose, clients = [] }) => {
         ))}
       </List>
     </Segment>
+    </React.Fragment>
+   
   );
   const renderWarningMessage = () => (
     <Segment color="blue" textAlign="center">
