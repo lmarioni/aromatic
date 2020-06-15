@@ -89,7 +89,7 @@ td {
 .w-100 {
     width: 100% !important;
 }
-.modalContent{
+.modalContent {
     min-height: 350px;
 }
 .pointer {
@@ -126,6 +126,10 @@ td {
 .justify-content-evenly {
     justify-content: space-evenly;
 }
-.separatedSegment{
+.separatedSegment {
     padding: 2em 0;
+}
+.flex-column {
+    display: flex !important;
+    flex-direction: column !important;
 }
