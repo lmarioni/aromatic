@@ -10,12 +10,18 @@ import {
 } from "semantic-ui-react";
 import { Context } from "../Context";
 import ReportList from "../components/ReportList";
+import "react-dates/initialize";
+import "react-dates/lib/css/_datepicker.css";
+import { DateRangePicker } from "react-dates";
 
 export const Reports = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
   const [reports, setReports] = useState([]);
   const [today, setToday] = useState(new Date());
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [focusedInput, setFocusedInput] = useState(null);
 
   useEffect(function () {
     fetchReports();
@@ -65,13 +71,26 @@ export const Reports = () => {
           Reportes
         </Header>
         <Grid>
-          <Grid.Column width={4} floated="left">
+          <Grid.Column width={3} floated="left">
             <div>Col 1</div>
           </Grid.Column>
-          <Grid.Column width={4} floated="left">
-            <div>Col 2</div>
+          <Grid.Column width={6} floated="left">
+            <DateRangePicker
+              startDate={startDate} // momentPropTypes.momentObj or null,
+              startDateId="your_unique_start_date_id" // PropTypes.string.isRequired,
+              startDatePlaceholderText="Inicio"
+              endDatePlaceholderText="Fin"
+              endDate={endDate} // momentPropTypes.momentObj or null,
+              endDateId="your_unique_end_date_id" // PropTypes.string.isRequired,
+              onDatesChange={({ startDate, endDate }) => {
+                setStartDate(startDate);
+                setEndDate(endDate);
+              }} // PropTypes.func.isRequired,
+              focusedInput={focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
+              onFocusChange={(fInput) => setFocusedInput(fInput)} // PropTypes.func.isRequired,
+            />
           </Grid.Column>
-          <Grid.Column width={4} floated="right">
+          <Grid.Column width={3} floated="right">
             <div>Col 3</div>
           </Grid.Column>
         </Grid>
