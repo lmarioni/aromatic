@@ -34,8 +34,6 @@ const PrintBillingModal = ({
   useEffect(
     function () {
       if (open && clients.length && date && id) {
-        setBillsToPrint([]);
-        setMultiPrint("");
         fetchRepeatedBills();
         //fetchBillingInfo();
       }
@@ -74,17 +72,17 @@ const PrintBillingModal = ({
   };
 
   const handleReset = () => {
-    setToday(new Date());
+    setBillsToPrint([]);
+    setMultiPrint("");
     setShowWarningMessage(false);
     setLoading(false);
-    setMinDate(null);
-    setSelectedDate(null);
-    setBillsToPrint([]);
     setLoadingButton(false);
+    setCreatedBills([]);
+    setAlreadyCreated(false);
   };
 
   const handleClose = () => {
-    //handleReset();
+    handleReset();
     onClose();
   };
 
