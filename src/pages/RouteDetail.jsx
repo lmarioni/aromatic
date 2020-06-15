@@ -24,11 +24,12 @@ import { searchInArr } from "../utils";
 import PrintBillingModal from "../modals/Billing";
 import SearchProductModal from "../modals/SearchProducts";
 
+import "moment/locale/es";
 import "react-dates/initialize";
 import "react-dates/lib/css/_datepicker.css";
 import { SingleDatePicker } from "react-dates";
-
 import { defaultColumns } from "../utils/initColumns";
+import { SingleDatePickerPhrases } from "../utils/localeCalendarPhrases";
 
 export const RouteDetail = () => {
   const [id, setId] = useState(0);
@@ -289,8 +290,10 @@ export const RouteDetail = () => {
 
   const renderDatePicker = () => (
     <SingleDatePicker
+      dayAriaLabelFormat="ES"
       placeholder="Fecha de facturación"
       block
+      phrases={SingleDatePickerPhrases}
       displayFormat={"DD-MM-YYYY"}
       orientation="vertical"
       verticalHeight={568}

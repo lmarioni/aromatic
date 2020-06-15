@@ -13,12 +13,14 @@ import {
   Dimmer,
   Loader,
 } from "semantic-ui-react";
+import "moment/locale/es";
 import "react-dates/initialize";
 import "react-dates/lib/css/_datepicker.css";
 import { Context } from "../Context";
 import ReportList from "../components/ReportList";
 import { DateRangePicker } from "react-dates";
 import { debounce } from "../utils";
+import { DateRangePickerPhrases } from "../utils/localeCalendarPhrases";
 
 export const Reports = () => {
   const { token } = useContext(Context);
@@ -201,6 +203,7 @@ export const Reports = () => {
 
   const renderDatePicker = () => (
     <DateRangePicker
+      phrases={DateRangePickerPhrases}
       displayFormat={"DD-MM-YYYY"}
       startDate={startDate} // momentPropTypes.momentObj or null,
       startDateId="your_unique_start_date_id" // PropTypes.string.isRequired,

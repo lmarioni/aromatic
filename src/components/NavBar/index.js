@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
-import {Link} from '@reach/router'
+import { Link } from "@reach/router";
 import { Container, Menu } from "semantic-ui-react";
-import './styles.scss';
+import "./styles.scss";
 export const NavBar = () => {
   const [currentRoute, setCurrentRoute] = useState("");
 
@@ -21,7 +21,13 @@ export const NavBar = () => {
   };
 
   return (
-    <Menu className="topNavbar" fixed={fixed ? "top" : null} pointing inverted size="large">
+    <Menu
+      className="topNavbar"
+      fixed={fixed ? "top" : null}
+      pointing
+      inverted
+      size="large"
+    >
       <Container>
         <Menu.Item
           as="a"
@@ -57,12 +63,12 @@ export const NavBar = () => {
             setCurrentRoute("configuraciones");
           }}
         >
-          <Link to="/configuraciones"> Configuraciones </Link>
+          Configuraciones
         </Menu.Item>
-        <Menu.Menu position='right'>
+        <Menu.Menu position="right">
           <Menu.Item
             as="a"
-            name='Salir'
+            name="Salir"
             onClick={() => {
               handleRedirect("logout");
             }}
