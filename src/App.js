@@ -9,7 +9,7 @@ import { Home } from "./pages/Home";
 import { NavBar } from "./components/NavBar";
 import { RouteDetail } from "./pages/RouteDetail";
 import { Products } from "./pages/Products";
-import { Clients } from "./pages/Clients";
+import { Reports } from "./pages/Reports";
 
 const App = () => {
   const { isAuth } = useContext(Context);
@@ -25,7 +25,7 @@ const App = () => {
         {!isAuth && <NotRegister default path="/no-registrado" />}
         <Home path="/inicio" default />
         <Products path="/productos" />
-        <Clients path="/clientes" />
+        <Reports path="/reportes" />
         <RouteDetail path="/detalles-ruta" />
       </Router>
     </Suspense>

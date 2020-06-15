@@ -9,88 +9,79 @@ import {
   Button,
 } from "semantic-ui-react";
 import { Context } from "../Context";
-import ClientList from "../components/ClientList";
+import ReportList from "../components/ReportList";
 
-export const Clients = () => {
+export const Reports = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
-  const [clients, setClients] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [today, setToday] = useState(new Date());
 
   useEffect(function () {
-    fetchClients();
+    fetchReports();
   }, []);
 
-  const fetchClients = () => {
+  const fetchReports = () => {
     setLoading(true);
     const data = {
       headers: new Headers({
         Authorization: "Bearer " + token,
       }),
     };
+    //https://api-aromatic.azurewebsites.net/facturas?desde=05-06-2020&hasta=15-06-2020&idcliente=22
 
-    // fetch(`${process.env.REACT_APP_BASE_URL}/clientes/`, data)
+    // fetch(`${process.env.REACT_APP_BASE_URL}/reports/`, data)
     //   .then((res) => res.json())
     //   .then((response) => {
-    //     setClientsList(response);
+    //     setReportsList(response);
     //     setLoading(false);
     //   });
     setLoading(false);
   };
 
-  const renderNoClients = () => (
+  const renderNoReports = () => (
     <div>
       <Segment placeholder textAlign="center">
         <Header icon>
           <Icon name="search" />
-          Parece que no hay clientes cargados
+          Parece que no hay reportes cargados a la fecha
         </Header>
-        <Segment.Inline>
-          <Button
-            primary
-            onClick={() => {
-              console.log("abrir modal ?");
-            }}
-          >
-            Crear cliente
-          </Button>
-        </Segment.Inline>
       </Segment>
     </div>
   );
 
   const renderLoading = () => (
     <Dimmer active inverted>
-      <Loader inverted>Cargando clientes</Loader>
+      <Loader inverted>Cargando reportes</Loader>
     </Dimmer>
   );
 
-  const renderClients = () => <ClientList clientsList={clients} />;
+  const renderReports = () => <ReportList reportList={reports} />;
 
   return (
     <div>
       <Container style={{ marginTop: "7em" }} textAlign="center">
         <Header as="h1" inverted textAlign="center">
-          Clientes
+          Reportes
         </Header>
         <Grid>
-          <Grid.Column floated="left" width={5}>
-            <Button
-              primary
-              onClick={() => {
-                console.log("abrir modal ?");
-              }}
-            >
-              Crear nuevo cliente
-            </Button>
+          <Grid.Column width={4} floated="left">
+            <div>Col 1</div>
+          </Grid.Column>
+          <Grid.Column width={4} floated="left">
+            <div>Col 2</div>
+          </Grid.Column>
+          <Grid.Column width={4} floated="right">
+            <div>Col 3</div>
           </Grid.Column>
         </Grid>
         <Divider />
 
         {loading
           ? renderLoading()
-          : clients.length
-          ? renderClients()
-          : renderNoClients()}
+          : reports.length
+          ? renderReports()
+          : renderNoReports()}
       </Container>
     </div>
   );

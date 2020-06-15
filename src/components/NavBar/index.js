@@ -42,12 +42,12 @@ export const NavBar = () => {
         </Menu.Item>
         <Menu.Item
           as="a"
-          active={currentRoute === "clientes"}
+          active={currentRoute === "reportes"}
           onClick={() => {
-            handleRedirect("clientes");
+            handleRedirect("reportes");
           }}
         >
-          Clientes
+          Reportes
         </Menu.Item>
       </Container>
     </Menu>
