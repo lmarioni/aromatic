@@ -59,6 +59,15 @@ export const NavBar = () => {
         >
           <Link to="/configuraciones"> Configuraciones </Link>
         </Menu.Item>
+        <Menu.Menu position='right'>
+          <Menu.Item
+            as="a"
+            name='Salir'
+            onClick={() => {
+              handleRedirect("logout");
+            }}
+          />
+        </Menu.Menu>
       </Container>
     </Menu>
   );

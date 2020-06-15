@@ -11,6 +11,7 @@ import { RouteDetail } from "./pages/RouteDetail";
 import { Products } from "./pages/Products";
 import { Clients } from "./pages/Clients";
 import { Configuraciones } from "./pages/Configuraciones";
+import Logout from "./pages/Logout";
 
 const App = () => {
   const { isAuth } = useContext(Context);
@@ -22,12 +23,13 @@ const App = () => {
         <NotFound path="404" />
         <NotRegister path="/no-registrado" />
         <Login path="/auth" />
+
         {!isAuth && <Redirect noThrow from="/" to="/no-registrado" />}
         {!isAuth && <Redirect noThrow from="/inicio" to="/no-registrado" />}
         {!isAuth && <Redirect noThrow from="/clientes" to="/no-registrado" />}
         {!isAuth && <Redirect noThrow from="/configuraciones" to="/no-registrado" />}
-        {!isAuth && <NotRegister default path="/no-registrado" />}
-        <Home path="/inicio" default />
+        <Logout path='/logout' />
+        <Home path="/inicio" default  />
         <Products path="/productos" />
         <Clients path="/clientes" />
         <Configuraciones path="/configuraciones" />
