@@ -8,6 +8,8 @@ import {
   List,
   Grid,
   Divider,
+  Dimmer,
+  Loader,
 } from "semantic-ui-react";
 import "react-infinite-calendar/styles.css";
 import { Context } from "../../Context";
@@ -32,6 +34,8 @@ const PrintBillingModal = ({
   useEffect(
     function () {
       if (open && clients.length && date && id) {
+        setBillsToPrint([]);
+        setMultiPrint("");
         fetchRepeatedBills();
         //fetchBillingInfo();
       }
@@ -130,6 +134,13 @@ const PrintBillingModal = ({
       setShowWarningMessage(true);
     }
   };
+
+  const renderLoading = () => (
+    <Dimmer active inverted>
+      <Loader inverted>Cargando facturas</Loader>
+    </Dimmer>
+  );
+
   const renderCreatedBills = () => (
     <div>
       <Segment placeholder>
@@ -137,35 +148,39 @@ const PrintBillingModal = ({
           Parece que estas facturas ya se encuentran emitidas.
         </Header>
       </Segment>
-      <Segment placeholder>
+      <Segment placeholder textAlign="center">
         <Grid columns={2} stackable textAlign="center">
           <Divider vertical>O</Divider>
 
           <Grid.Row verticalAlign="middle">
             <Grid.Column>
-              <Header icon>
+              <Header as="h2" icon>
                 <Icon name="search" />
-                Puede descargarlas nuevamente desde aquí abajo
+                Puede descargarlas nuevamente
+                <Header.Subheader>
+                  Haciendo click en los siguientes links
+                </Header.Subheader>
               </Header>
-              <List link>
+              <List divided link>
                 {createdBills.map(({ invoices, id, idruta }) => (
                   <List.Item as="a" href={invoices}>
-                    Ruta {idruta}
+                    Factura - Ruta {idruta}
                   </List.Item>
                 ))}
               </List>
             </Grid.Column>
-            <Grid.Column>
+            <Grid.Column className="flex-column">
               <Header icon>
                 <Icon name="repeat" />
-                <Button
-                  primary
-                  onClick={handleEmitBill}
-                  disabled={alreadyCreated}
-                >
-                  Emitirlas nuevamente
-                </Button>
+                Emitirlas nuevamente
               </Header>
+              <Button
+                primary
+                onClick={handleEmitBill}
+                disabled={alreadyCreated}
+              >
+                Re-emitir facturas
+              </Button>
             </Grid.Column>
           </Grid.Row>
         </Grid>
@@ -174,9 +189,11 @@ const PrintBillingModal = ({
   );
   const renderPrintBills = () => (
     <React.Fragment>
-      <Segment>
-        <a href={multiPrint}>Descargar todas las facturas</a>
-      </Segment>
+      {billsToPrint && billsToPrint.length > 1 && (
+        <Segment>
+          <a href={multiPrint}>Descargar todas las facturas</a>
+        </Segment>
+      )}
       <Segment color="blue" textAlign="center">
         <List divided relaxed>
           {billsToPrint.map(({ filename, idfactura }, index) => (
@@ -210,8 +227,18 @@ const PrintBillingModal = ({
   );
   const renderContent = () => (
     <div>
-      {createdBills.length > 0 && renderCreatedBills()}
-      {billsToPrint && billsToPrint.length && renderPrintBills()}
+      {loading ? (
+        renderLoading()
+      ) : (
+        <div>
+          {createdBills.length > 0 && renderCreatedBills()}
+          {billsToPrint
+            ? billsToPrint.length
+              ? renderPrintBills()
+              : null
+            : null}
+        </div>
+      )}
     </div>
   );
   return (
@@ -221,16 +248,6 @@ const PrintBillingModal = ({
         {!showWarningMessage ? renderContent() : renderWarningMessage()}
       </Modal.Content>
       <Modal.Actions>
-        {billsToPrint && billsToPrint.length ? null : (
-          <Button
-            primary
-            onClick={handleEmitBill}
-            disabled={showWarningMessage}
-            loading={loadingButton}
-          >
-            Emitir facturas
-          </Button>
-        )}
         <Button basic onClick={handleClose}>
           Cerrar
         </Button>

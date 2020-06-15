@@ -22,11 +22,12 @@ const RoutesList = ({ routesList = [] }) => {
 
   const renderRoutes = () => (
     <Card.Group className="routeListContainer">
-      {routes.map((route) => {
+      {routes.map(({ id, nombre, observacion = "" }) => {
         return (
-          <Card inverted="true" key={`route-${route.id}`}>
+          <Card inverted="true" key={`route-${id}`}>
             <Card.Content>
-              <Card.Header>{route.nombre}</Card.Header>
+              <Card.Header>{nombre}</Card.Header>
+              <Card.Meta>{observacion ? observacion : 'Sin observaciones'}</Card.Meta>
             </Card.Content>
             <Card.Content extra>
               <div className="ui two buttons">
@@ -34,7 +35,7 @@ const RoutesList = ({ routesList = [] }) => {
                   basic
                   color="blue"
                   onClick={() => {
-                    redirect(route.id);
+                    redirect(id);
                   }}
                 >
                   Ver clientes

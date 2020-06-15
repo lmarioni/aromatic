@@ -176,8 +176,17 @@ export const RouteDetail = () => {
 
   const mergeRoutes = (newRoutes = []) => {
     const new_clients = clients.concat(newRoutes);
-    setClients(new_clients);
-    setFilteredClients(new_clients);
+    const parsedClients = new_clients.map((client) => {
+      client.productos = [{ producto: prodArr[0], cantidad: 1 }];
+      client.idproducto = [prodArr[0].id];
+      client.nombreproducto = prodArr[0].nombre;
+      client.precio = prodArr[0].precio;
+      client.precioCosto = prodArr[0].precioCosto;
+      client.facturar = true;
+      return client;
+    });
+    setClients(parsedClients);
+    setFilteredClients(parsedClients);
   };
 
   const handleClosePrintBilling = () => {
@@ -340,7 +349,7 @@ export const RouteDetail = () => {
   );
   const renderLoading = () => (
     <Dimmer active inverted>
-      <Loader inverted>Cargando datos</Loader>
+      <Loader inverted>Cargando clientes</Loader>
     </Dimmer>
   );
 
@@ -444,7 +453,7 @@ export const RouteDetail = () => {
       />
       <Container style={{ marginTop: "7em" }} textAlign="center">
         <Header as="h1" inverted textAlign="center">
-          Ruta / Listado de clientes
+          Listado de clientes
         </Header>
         <Grid>
           <Grid.Column floated="left" width={4}>
