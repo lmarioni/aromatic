@@ -31,6 +31,7 @@ const AssignClientsModal = ({ id, open, onClose }) => {
 
   const handleClickFileUpload = () => {
     resetForm();
+    document.getElementById("uploadXls").value = "";
     document.getElementById("uploadXls").click();
   };
 
@@ -67,7 +68,6 @@ const AssignClientsModal = ({ id, open, onClose }) => {
               email: routeRow[12],
             };
           });
-          console.log(newClientsParsed);
         setNewClients(newClientsParsed);
       }
     });
