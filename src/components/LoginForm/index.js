@@ -12,8 +12,7 @@ import {
 } from "semantic-ui-react";
 import { useLocation } from "@reach/router";
 import { Context } from "../../Context";
-
-import Logo from "../../assets/img/logo/logo.png";
+import Logo from "../../assets/img/logo/isologo.png";
 
 const LoginForm = () => {
   const { activateAuth } = useContext(Context);
@@ -92,52 +91,51 @@ const LoginForm = () => {
           verticalAlign="middle"
         >
           <Grid.Column style={{ maxWidth: 450 }}>
-            <Header as="h2" color="teal" textAlign="center">
-              <Image src={Logo} /> Ingresa a tu cuenta
-            </Header>
-            <Form
-              size="large"
-              onSubmit={handleSubmit}
-              loading={loading}
-              error={error}
-            >
-              <Segment stacked>
-                <Form.Input
-                  fluid
-                  name="username"
-                  onChange={handleUsername}
-                  value={username}
-                  icon="user"
-                  iconPosition="left"
-                  placeholder="E-mail"
-                />
-                <Form.Input
-                  fluid
-                  name="password"
-                  onChange={handleUPassword}
-                  value={password}
-                  icon="lock"
-                  iconPosition="left"
-                  placeholder="Contraseña"
-                  type="password"
-                />
-                <Button type="submit" color="teal" fluid size="large">
-                  Ingresar
-                </Button>
-                {error !== "" && (
-                  <Message
-                    error
-                    header="Error"
-                    content={
-                      "Hubo un error al querer ingresar al sistema. " + error
-                    }
+            <Segment>
+              <Header as="h2" color="teal" textAlign="center">
+                <Image src={Logo} size="large" className="w-100" />
+              </Header>
+              <Form
+                size="large"
+                onSubmit={handleSubmit}
+                loading={loading}
+                error={error}
+              >
+                <Segment>
+                  <Form.Input
+                    fluid
+                    name="username"
+                    onChange={handleUsername}
+                    value={username}
+                    icon="user"
+                    iconPosition="left"
+                    placeholder="E-mail"
                   />
-                )}
-              </Segment>
-            </Form>
-            <Message>
-              Problemas? <a href="#">Envianos tu consulta</a>
-            </Message>
+                  <Form.Input
+                    fluid
+                    name="password"
+                    onChange={handleUPassword}
+                    value={password}
+                    icon="lock"
+                    iconPosition="left"
+                    placeholder="Contraseña"
+                    type="password"
+                  />
+                  <Button type="submit" color="teal" fluid size="large">
+                    Ingresar
+                  </Button>
+                  {error !== "" && (
+                    <Message
+                      error
+                      header="Error"
+                      content={
+                        "Hubo un error al querer ingresar al sistema. " + error
+                      }
+                    />
+                  )}
+                </Segment>
+              </Form>
+            </Segment>
           </Grid.Column>
         </Grid>
       )}

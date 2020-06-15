@@ -3,11 +3,11 @@ import "./styles.scss";
 import { Container } from "semantic-ui-react";
 import LoginForm from "../LoginForm";
 
-export const Auth = ({ idCurso = "" }) => {
+export const Auth = () => {
   return (
     <React.Fragment>
       <Container>
-        <LoginForm idCurso={idCurso} />
+        <LoginForm />
       </Container>
     </React.Fragment>
   );
