@@ -7,10 +7,8 @@ import Cookies from "universal-cookie";
 const authCookie = `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyaWQiOiIyMTA5NSJ9.MezTb9xGhGCU0h-JkjBuLAN1KfyysJslNd5n130403g`;
 
 export const NotRegister = () => {
-  const login = () => {
-    const cookies = new Cookies();
-    cookies.set("token", authCookie);
-    navigate("./");
+  const navigateLogin = () => {
+    navigate("./auth");
   };
 
   return (
@@ -38,10 +36,8 @@ export const NotRegister = () => {
           Debes ingresar al sistema para seguir
         </Header>
 
-        <Button inverted>
-          <Link to="/auth" className="btn btn-success btn-lg">
+        <Button inverted primary onClick={navigateLogin}>
             Ingresar
-          </Link>
         </Button>
       </div>
     </div>
