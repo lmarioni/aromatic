@@ -54,10 +54,7 @@ export const RouteDetail = () => {
   const [minDate, setMinDate] = useState(null);
   const [serie, setSerie] = useState(0);
   const [printBilling, setPrintBilling] = useState(true);
-
-  const handleUpdateCookieColumns = (newValue) => {
-    Cookies.set("columns", newValue);
-  };
+  const [realColumnCount, setRealColumnCount] = useState(0);
 
   useEffect(function () {
     if (params && params.length) {
@@ -74,6 +71,7 @@ export const RouteDetail = () => {
 
     if (!cachedColumns) {
       setColumns(defaultColumns);
+      handleRealColumnCount(defaultColumns);
     } else {
       const parsedCachedColumns = JSON.parse(cachedColumns);
       const newColumns = defaultColumns.map((col, index) => {
@@ -87,17 +85,24 @@ export const RouteDetail = () => {
         return col;
       });
       setColumns(newColumns);
+      handleRealColumnCount(newColumns);
     }
   }, []);
 
-  useEffect(
-    function () {
-      if (columns.length) {
-        handleUpdateCookieColumns(columns);
-      }
-    },
-    [columns]
-  );
+  useEffect(() => {
+    if (columns.length) {
+      handleUpdateCookieColumns(columns);
+    }
+  }, [columns]);
+
+  const handleUpdateCookieColumns = (newValue) => {
+    Cookies.set("columns", newValue);
+  };
+
+  const handleRealColumnCount = (cols = columns) => {
+    const count = cols.reduce((sum, col) => (sum + (col.display ? 1 : 0)), 0);
+    setRealColumnCount(count);
+  };
 
   const fetchBillingInfo = () => {
     const data = {
@@ -201,6 +206,7 @@ export const RouteDetail = () => {
   const handleCloseTableSettings = (newColumns = []) => {
     if (newColumns && newColumns.length) {
       setColumns(newColumns);
+      handleRealColumnCount(newColumns);
       handleUpdateCookieColumns(newColumns);
     }
     setShowTableSettings(false);
@@ -380,7 +386,7 @@ export const RouteDetail = () => {
 
   const renderClients = () => {
     return (
-      <Container textAlign="center">
+      <Container fluid={realColumnCount > 10} textAlign="center">
         <Grid>
           <Grid.Column width={4} floated="left">
             <Input
@@ -505,7 +511,11 @@ export const RouteDetail = () => {
         open={showAssignModalClients}
         onClose={handleCloseAssignClientsModal}
       />
-      <Container style={{ marginTop: "7em" }} textAlign="center">
+      <Container
+        style={{ marginTop: "7em", overflow: "auto" }}
+        textAlign="center"
+        fluid={realColumnCount > 10}
+      >
         <Header as="h1" inverted textAlign="center">
           Listado de clientes
         </Header>
@@ -525,7 +535,7 @@ export const RouteDetail = () => {
             </Button>
           </Grid.Column>
           <Grid.Column floated="right" width={5}>
-          <Link class="ui primary button" to={`/facturas/rutas/${id}`}>
+            <Link class="ui primary button" to={`/facturas/rutas/${id}`}>
               Ver Historial
             </Link>
             <Button
