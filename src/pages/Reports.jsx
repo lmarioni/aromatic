@@ -21,12 +21,13 @@ import ReportList from "../components/ReportList";
 import { DateRangePicker } from "react-dates";
 import { debounce } from "../utils";
 import { DateRangePickerPhrases } from "../utils/localeCalendarPhrases";
+import moment from "moment";
 
 export const Reports = () => {
   const { token } = useContext(Context);
   const [loading, setLoading] = useState(false);
   const [reports, setReports] = useState([]);
-  const [today, setToday] = useState(new Date());
+  const [today, setToday] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [focusedInput, setFocusedInput] = useState(null);
@@ -130,11 +131,11 @@ export const Reports = () => {
     <List>
       <List.Item
         icon="calendar alternate outline"
-        content={`Fecha inicio ${startDate}`}
+        content={`Fecha inicio ${moment(startDate).format("DD-MM-YYYY")}`}
       />
       <List.Item
         icon="calendar alternate outline"
-        content={`Fecha fin ${endDate}`}
+        content={`Fecha fin ${moment(endDate).format("DD-MM-YYYY")}`}
       />
       {client && (
         <List.Item
@@ -203,6 +204,7 @@ export const Reports = () => {
 
   const renderDatePicker = () => (
     <DateRangePicker
+      isOutsideRange={() => false}
       phrases={DateRangePickerPhrases}
       displayFormat={"DD-MM-YYYY"}
       startDate={startDate} // momentPropTypes.momentObj or null,
