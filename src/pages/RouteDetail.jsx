@@ -15,6 +15,7 @@ import {
   Label,
   Input,
   Checkbox,
+  Confirm,
 } from "semantic-ui-react";
 import { useLocation } from "@reach/router";
 import Cookies from "js-cookie";
@@ -44,6 +45,7 @@ export const RouteDetail = () => {
   const [showAssignModalClients, setShowAssignModalClients] = useState(false);
   const [showPrintBillingModal, setShowPrintBillingModal] = useState(false);
   const [showTableSettings, setShowTableSettings] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [columns, setColumns] = useState([]);
   const [clientToAddProduct, setClientToAddProduct] = useState(null);
   const [searchValue, setSearchValue] = useState("");
@@ -288,6 +290,14 @@ export const RouteDetail = () => {
     setLoading(false);
   };
 
+  const handleCancel = () => {
+    setShowConfirmation(false);
+  };
+
+  const handleConfirmation = () => {
+    setShowPrintBillingModal(true);
+  };
+
   const renderDatePicker = () => (
     <SingleDatePicker
       dayAriaLabelFormat="ES"
@@ -379,7 +389,7 @@ export const RouteDetail = () => {
               primary
               disabled={!clients || !clients.length || !id || !date}
               onClick={() => {
-                setShowPrintBillingModal(true);
+                setShowConfirmation(true);
               }}
             >
               Imprimir facturas
@@ -433,6 +443,15 @@ export const RouteDetail = () => {
 
   return (
     <div>
+      <Confirm
+        open={showConfirmation}
+        header="Imprimir facturas"
+        content="Esta acción enviará a generar las facturas"
+        confirmButton="Generar las facturas"
+        cancelButton="Volver"
+        onCancel={handleCancel}
+        onConfirm={handleConfirmation}
+      />
       <SearchProductModal
         client={clientToAddProduct}
         open={showProductModal}
