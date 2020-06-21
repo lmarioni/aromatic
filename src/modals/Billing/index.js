@@ -161,7 +161,7 @@ const PrintBillingModal = ({
               </Header>
               <List divided link>
                 {createdBills.map(({ invoices, id, idruta }) => (
-                  <List.Item as="a" href={invoices}>
+                  <List.Item as="a" href={invoices} key={`createdBill${id}`}>
                     Factura - Ruta {idruta}
                   </List.Item>
                 ))}

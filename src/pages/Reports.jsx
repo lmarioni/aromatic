@@ -206,11 +206,11 @@ export const Reports = () => {
       phrases={DateRangePickerPhrases}
       displayFormat={"DD-MM-YYYY"}
       startDate={startDate} // momentPropTypes.momentObj or null,
-      startDateId="your_unique_start_date_id" // PropTypes.string.isRequired,
+      startDateId="billingStartDate" // PropTypes.string.isRequired,
       startDatePlaceholderText="Inicio"
       endDatePlaceholderText="Fin"
       endDate={endDate} // momentPropTypes.momentObj or null,
-      endDateId="your_unique_end_date_id" // PropTypes.string.isRequired,
+      endDateId="billingEndDate" // PropTypes.string.isRequired,
       onDatesChange={({ startDate, endDate }) => {
         setClient(null);
         setStartDate(startDate);

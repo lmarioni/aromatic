@@ -52,6 +52,7 @@ export const RouteDetail = () => {
   const params = useLocation().search.substr(1).split("&");
   const [minDate, setMinDate] = useState(null);
   const [serie, setSerie] = useState(0);
+  const [printBilling, setPrintBilling] = useState(true);
 
   const handleUpdateCookieColumns = (newValue) => {
     Cookies.set("columns", newValue);
@@ -164,19 +165,6 @@ export const RouteDetail = () => {
     );
   };
 
-  const handleSearchValue = ({ value }) => {
-    setLoading(true);
-    setSearchValue(value);
-    const searchedClients = searchInArr(clients, value);
-    if (searchedClients.length) {
-      setFilteredClients(searchedClients);
-      setLoading(false);
-    } else {
-      setFilteredClients(clients);
-      setLoading(false);
-    }
-  };
-
   const mergeRoutes = (newRoutes = []) => {
     const new_clients = clients.concat(newRoutes);
     const parsedClients = new_clients.map((client) => {
@@ -190,6 +178,19 @@ export const RouteDetail = () => {
     });
     setClients(parsedClients);
     setFilteredClients(parsedClients);
+  };
+
+  const handleSearchValue = ({ value }) => {
+    setLoading(true);
+    setSearchValue(value);
+    const searchedClients = searchInArr(clients, value);
+    if (searchedClients.length) {
+      setFilteredClients(searchedClients);
+      setLoading(false);
+    } else {
+      setFilteredClients(clients);
+      setLoading(false);
+    }
   };
 
   const handleClosePrintBilling = () => {
@@ -298,6 +299,15 @@ export const RouteDetail = () => {
     setShowPrintBillingModal(true);
   };
 
+  const handleTogglePrintBilling = (action) => {
+    setPrintBilling(action);
+    const parsedFilteredClients = filteredClients.map((client) => {
+      client.facturar = action;
+      return client;
+    });
+    setFilteredClients(parsedFilteredClients);
+  };
+
   const renderDatePicker = () => (
     <SingleDatePicker
       dayAriaLabelFormat="ES"
@@ -311,14 +321,14 @@ export const RouteDetail = () => {
       onDateChange={(newDate) => setDate(newDate)} // PropTypes.func.isRequired
       focused={dateFocused} // PropTypes.bool
       onFocusChange={({ focused }) => setDateFocused(focused)} // PropTypes.func.isRequired
-      id="your_unique_id" // PropTypes.string.isRequired,
+      id="billingSingleDatePicker" // PropTypes.string.isRequired,
       isOutsideRange={(day) => day.isBefore(minDate)}
     />
   );
 
   const renderBillCheckbox = (client = {}) => (
     <Checkbox
-      defaultChecked={true}
+      checked={client.facturar}
       onClick={() => {
         handleToggleBilling(client);
       }}
@@ -396,7 +406,6 @@ export const RouteDetail = () => {
             </Button>
           </Grid.Column>
         </Grid>
-
         <Table size="small" celled selectable>
           <Table.Header>
             <Table.Row>
@@ -404,7 +413,28 @@ export const RouteDetail = () => {
                 if (column.display) {
                   return (
                     <Table.HeaderCell key={`main-column-${column}-${index}`}>
-                      {column.label}
+                      {column.key === "facturar" ? (
+                        <Button.Group>
+                          <Button
+                            positive
+                            onClick={() => {
+                              handleTogglePrintBilling(true);
+                            }}
+                          >
+                            Facturar
+                          </Button>
+                          <Button.Or text="o" />
+                          <Button
+                            onClick={() => {
+                              handleTogglePrintBilling(false);
+                            }}
+                          >
+                            No facturar
+                          </Button>
+                        </Button.Group>
+                      ) : (
+                        column.label
+                      )}
                     </Table.HeaderCell>
                   );
                 }
@@ -493,10 +523,8 @@ export const RouteDetail = () => {
               Configurar tabla
             </Button>
           </Grid.Column>
-          <Grid.Column width={4}>
-            {/* <Button primary>Asignar reparto</Button> */}
-          </Grid.Column>
-          <Grid.Column floated="right" width={4}>
+          <Grid.Column width={4}></Grid.Column>
+          <Grid.Column floated="right" width={3}>
             <Button
               primary
               onClick={() => {
