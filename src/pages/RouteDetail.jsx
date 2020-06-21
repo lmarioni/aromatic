@@ -302,6 +302,7 @@ export const RouteDetail = () => {
       focused={dateFocused} // PropTypes.bool
       onFocusChange={({ focused }) => setDateFocused(focused)} // PropTypes.func.isRequired
       id="your_unique_id" // PropTypes.string.isRequired,
+      isOutsideRange={(day) => day.isBefore(minDate)}
     />
   );
 
