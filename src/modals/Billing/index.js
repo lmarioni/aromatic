@@ -76,7 +76,6 @@ const PrintBillingModal = ({
         invoice.client = client;
         return invoice;
       });
-      console.log({ createdInvoices });
       setCreatedBills(createdInvoices);
     }
   };
