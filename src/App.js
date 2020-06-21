@@ -8,6 +8,7 @@ import { Login } from "./pages/Login";
 import { Home } from "./pages/Home";
 import { NavBar } from "./components/NavBar";
 import { RouteDetail } from "./pages/RouteDetail";
+import { Historic } from "./pages/Historic";
 import { Products } from "./pages/Products";
 import { Reports } from "./pages/Reports";
 import { Configuraciones } from "./pages/Configuraciones";
@@ -33,6 +34,7 @@ const App = () => {
         <Reports path="/reportes" />
         <Configuraciones path="/configuraciones" />
         <RouteDetail path="/detalles-ruta" />
+        <Historic path="/facturas/rutas/:idRuta" />
       </Router>
     </Suspense>
   );

@@ -16,7 +16,8 @@ import {
   Input,
   Checkbox,
 } from "semantic-ui-react";
-import { useLocation } from "@reach/router";
+
+import { useLocation, Link } from "@reach/router";
 import Cookies from "js-cookie";
 import AssignClientsModal from "../modals/Clients/AssignClients";
 import TableSettingsModal from "../modals/Clients/TableSettings";
@@ -476,7 +477,10 @@ export const RouteDetail = () => {
           <Grid.Column width={4}>
             {/* <Button primary>Asignar reparto</Button> */}
           </Grid.Column>
-          <Grid.Column floated="right" width={4}>
+          <Grid.Column floated="right" width={6}>
+          <Link class="ui primary button" to={`/facturas/rutas/${id}`}>
+              Ver Historial
+            </Link>
             <Button
               primary
               onClick={() => {
