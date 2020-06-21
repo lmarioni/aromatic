@@ -100,7 +100,7 @@ export const RouteDetail = () => {
   };
 
   const handleRealColumnCount = (cols = columns) => {
-    const count = cols.reduce((sum, col) => (sum + (col.display ? 1 : 0)), 0);
+    const count = cols.reduce((sum, col) => sum + (col.display ? 1 : 0), 0);
     setRealColumnCount(count);
   };
 
@@ -318,8 +318,8 @@ export const RouteDetail = () => {
   const renderDatePicker = () => (
     <SingleDatePicker
       dayAriaLabelFormat="ES"
-      placeholder="Fecha de facturación"
       block
+      placeholder="Fecha de facturación"
       phrases={SingleDatePickerPhrases}
       displayFormat={"DD-MM-YYYY"}
       orientation="vertical"
@@ -386,7 +386,7 @@ export const RouteDetail = () => {
 
   const renderClients = () => {
     return (
-      <Container fluid={realColumnCount > 10} textAlign="center">
+      <Container fluid={realColumnCount > 10} textAlign="center" className="mh-vh-100">
         <Grid>
           <Grid.Column width={4} floated="left">
             <Input
@@ -512,9 +512,9 @@ export const RouteDetail = () => {
         onClose={handleCloseAssignClientsModal}
       />
       <Container
-        style={{ marginTop: "7em", overflow: "auto" }}
+        style={{ marginTop: "7em", overflowX: "auto", overflowY: "hidden" }}
         textAlign="center"
-        fluid={realColumnCount > 10}
+        minHeight="100%"
       >
         <Header as="h1" inverted textAlign="center">
           Listado de clientes

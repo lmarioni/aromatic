@@ -79,6 +79,10 @@ td {
     justify-content: space-evenly;
 }
 
+.mh-vh-100{
+    min-height: calc(100vh - 85px);
+}
+
 .h-vh-100 {
     height: calc(100vh - 85px);
 }
