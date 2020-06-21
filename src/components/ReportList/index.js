@@ -41,7 +41,7 @@ const ReportList = ({ reportList = [] }) => {
               </Card.Content>
               <Card.Content extra>
                 <a href={report.url} target="_blank">
-                  Link al reporte
+                  Ver factura
                 </a>{" "}
               </Card.Content>
             </Card>

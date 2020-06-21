@@ -156,12 +156,13 @@ const PrintBillingModal = ({
                 <Icon name="search" />
                 Puede descargarlas nuevamente
                 <Header.Subheader>
-                  Haciendo click en los siguientes links
+                  No se generarán nuevas facturas. solo las imprimirás. <br/>
+                  Haz click en el siguiente link:
                 </Header.Subheader>
               </Header>
               <List divided link>
                 {createdBills.map(({ invoices, id, idruta }) => (
-                  <List.Item as="a" href={invoices} key={`createdBill${id}`}>
+                  <List.Item as="a" style={{color: 'blue'}} href={invoices} key={`createdBill${id}`}>
                     Factura - Ruta {idruta}
                   </List.Item>
                 ))}
@@ -171,6 +172,9 @@ const PrintBillingModal = ({
               <Header icon>
                 <Icon name="repeat" />
                 Emitirlas nuevamente
+                <Header.Subheader>
+                  Esto generará nuevos numeros de factura
+                </Header.Subheader>
               </Header>
               <Button
                 primary

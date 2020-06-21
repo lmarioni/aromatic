@@ -17,7 +17,8 @@ import {
   Checkbox,
   Confirm,
 } from "semantic-ui-react";
-import { useLocation } from "@reach/router";
+
+import { useLocation, Link } from "@reach/router";
 import Cookies from "js-cookie";
 import AssignClientsModal from "../modals/Clients/AssignClients";
 import TableSettingsModal from "../modals/Clients/TableSettings";
@@ -509,7 +510,7 @@ export const RouteDetail = () => {
           Listado de clientes
         </Header>
         <Grid>
-          <Grid.Column floated="left" width={4}>
+          <Grid.Column floated="left" width={3}>
             <Button
               icon
               labelPosition="left"
@@ -523,8 +524,10 @@ export const RouteDetail = () => {
               Configurar tabla
             </Button>
           </Grid.Column>
-          <Grid.Column width={4}></Grid.Column>
-          <Grid.Column floated="right" width={3}>
+          <Grid.Column floated="right" width={5}>
+          <Link class="ui primary button" to={`/facturas/rutas/${id}`}>
+              Ver Historial
+            </Link>
             <Button
               primary
               onClick={() => {
