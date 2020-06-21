@@ -29,6 +29,15 @@ const AssignClientsModal = ({ id, open, onClose }) => {
     setNewClients([]);
   };
 
+  const handleRemoveRow = (row, index) => {
+    console.log(`Wants to remove row index: ${index}`);
+    console.log(row);
+    const newClientsFiltered = newClients.filter(client => client !== row);
+    if(newClientsFiltered){
+      setNewClients(newClientsFiltered);
+    }
+  }
+
   const handleClickFileUpload = () => {
     resetForm();
     document.getElementById("uploadXls").value = "";
@@ -49,6 +58,7 @@ const AssignClientsModal = ({ id, open, onClose }) => {
         setShowErrorUploading(true);
       } else {
         setUploadingFile(false);
+        resp.rows.shift();
         const newClientsParsed = resp.rows
           .filter((row) => row.length)
           .map((routeRow) => {
@@ -81,6 +91,7 @@ const AssignClientsModal = ({ id, open, onClose }) => {
           <Table.Row>
             <Table.HeaderCell>Nombre</Table.HeaderCell>
             <Table.HeaderCell>Localidad</Table.HeaderCell>
+            <Table.HeaderCell>Quitar</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -99,6 +110,7 @@ const AssignClientsModal = ({ id, open, onClose }) => {
                     </Header>
                   </Table.Cell>
                   <Table.Cell>{newRoute.localidad}</Table.Cell>
+                  <Table.Cell><Icon onClick={()=>{handleRemoveRow(newRoute, index)}} className="pointer" name="remove" /></Table.Cell>
                 </Table.Row>
               );
             })}
