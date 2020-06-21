@@ -13,6 +13,7 @@ import {
 } from "semantic-ui-react";
 import "react-infinite-calendar/styles.css";
 import { Context } from "../../Context";
+import { parse } from "semver";
 
 const PrintBillingModal = ({
   id = null,
@@ -67,7 +68,16 @@ const PrintBillingModal = ({
       handleEmitBill();
     } else {
       setLoading(false);
-      setCreatedBills(parsedResponse);
+      const createdInvoices = parsedResponse.map((invoice, index) => {
+        let client = clients.find((client) => client.id === invoice.idcliente);
+        if (client === undefined) {
+          client = clients[index];
+        }
+        invoice.client = client;
+        return invoice;
+      });
+      console.log({ createdInvoices });
+      setCreatedBills(createdInvoices);
     }
   };
 
@@ -124,7 +134,12 @@ const PrintBillingModal = ({
       );
       const parsedResponse = await response.json();
       setMultiPrint(parsedResponse.multi);
-      const billsArray = parsedResponse.invoices;
+      const billsArray = parsedResponse.invoices.map((invoice) => {
+        invoice.client = clients.find(
+          (client) => client.id === invoice.idcliente
+        );
+        return invoice;
+      });
       setBillsToPrint(billsArray);
       setLoadingButton(false);
       setLoading(false);
@@ -156,14 +171,33 @@ const PrintBillingModal = ({
                 <Icon name="search" />
                 Puede descargarlas nuevamente
                 <Header.Subheader>
-                  No se generarán nuevas facturas. solo las imprimirás. <br/>
+                  No se generarán nuevas facturas. solo las imprimirás. <br />
                   Haz click en el siguiente link:
                 </Header.Subheader>
               </Header>
               <List divided link>
-                {createdBills.map(({ invoices, id, idruta }) => (
-                  <List.Item as="a" style={{color: 'blue'}} href={invoices} key={`createdBill${id}`}>
-                    Factura - Ruta {idruta}
+                {createdBills.map(({ invoices, id, idruta, client = {} }) => (
+                  <List.Item
+                    as="a"
+                    style={{ color: "blue" }}
+                    href={invoices}
+                    key={`createdBill${id}`}
+                  >
+                    {Object.keys(client).length
+                      ? `${
+                          client.nombreFantasia
+                            ? client.nombreFantasia
+                            : client.nombre
+                        }
+                      ${
+                        client.productos.length
+                          ? client.productos.map(
+                              ({ producto, cantidad }) =>
+                                `${producto.nombre} x ${cantidad}`
+                            )
+                          : ""
+                      }`
+                      : `Factura - Ruta ${idruta}`}
                   </List.Item>
                 ))}
               </List>
@@ -198,12 +232,25 @@ const PrintBillingModal = ({
       )}
       <Segment color="blue" textAlign="center">
         <List divided relaxed>
-          {billsToPrint.map(({ filename, idfactura }, index) => (
+          {billsToPrint.map(({ filename, idfactura, client }, index) => (
             <List.Item key={`bill-${index}`}>
               <List.Icon name="print" size="large" verticalAlign="middle" />
               <List.Content>
                 <Header>
-                  <a href={filename}>Imprimir factura</a>
+                  <a href={filename}>
+                    {Object.keys(client).length
+                      ? `${
+                          client.nombreFantasia
+                            ? client.nombreFantasia
+                            : client.nombre
+                        }
+                        ${client.productos.map(
+                          ({ producto, cantidad }) =>
+                            `${producto.nombre} x ${cantidad}`
+                        )} 
+                        `
+                      : `Factura`}
+                  </a>
                 </Header>
                 <List.Description as="a">
                   Factura número {idfactura}
