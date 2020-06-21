@@ -22,12 +22,12 @@ const RoutesList = ({ routesList = [] }) => {
 
   const renderRoutes = () => (
     <Card.Group className="routeListContainer">
-      {routes.map(({ id, nombre, observacion = "" }) => {
+      {routes.map(({ id, nombre, descripcion = "" }) => {
         return (
           <Card inverted="true" key={`route-${id}`}>
             <Card.Content>
               <Card.Header>{nombre}</Card.Header>
-              <Card.Meta>{observacion ? observacion : 'Sin observaciones'}</Card.Meta>
+              <Card.Meta>{descripcion ? descripcion : 'Sin observaciones'}</Card.Meta>
             </Card.Content>
             <Card.Content extra>
               <div className="ui two buttons">

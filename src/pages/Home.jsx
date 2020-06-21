@@ -21,7 +21,7 @@ export const Home = () => {
   const [loading, setLoading] = useState(false);
   const [loadingSubmitButton, setLoadingSubmitButton] = useState(false);
   const [routeName, setRouteName] = useState("");
-  const [routeObservation, setRouteObservation] = useState("");
+  const [routeDescription, setRouteDescription] = useState("");
   const [routesList, setRoutesList] = useState([]);
   const [message, setMessage] = useState({});
   const [showMessage, setShowMessage] = useState(false);
@@ -49,6 +49,7 @@ export const Home = () => {
 
   const reset = () => {
     setRouteName("");
+    setRouteDescription("");
   };
 
   const handleOpenModal = () => setModalShow(true);
@@ -89,6 +90,7 @@ export const Home = () => {
       }),
       body: JSON.stringify({
         nombre: routeName,
+        descripcion: routeDescription
       }),
     };
     const response = await fetch(
@@ -149,9 +151,9 @@ export const Home = () => {
           <Form.Field>
             <label>Observación</label>
             <input
-              value={routeObservation}
-              onChange={(e) => setRouteObservation(e.target.value)}
-              name="routeObservation"
+              value={routeDescription}
+              onChange={(e) => setRouteDescription(e.target.value)}
+              name="routeDescription"
               type="text"
               placeholder="Ingrese aquí si la hubiese una observación para la nueva ruta"
             />
