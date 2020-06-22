@@ -7,15 +7,11 @@ import {
   Modal,
   Form,
   Grid,
-  Loader
+  Loader,
 } from "semantic-ui-react";
 import { Context } from "../../Context";
 
-const ProductCreationModal = ({
-  id,
-  open,
-  onClose
-}) => {
+const ProductCreationModal = ({ id, open, onClose }) => {
   const { token } = useContext(Context);
   const [newProduct, setNewProduct] = useState([]);
   const [loadingButton, setLoadingButton] = useState(false);
@@ -216,8 +212,8 @@ const ProductCreationModal = ({
             >
               Precio total percibido por los clientes: $
               {ivaSelected !== null && ivaSelected.porcentaje
-                ? ivaSelected.porcentaje * precio
-                : precio}
+                ?( (ivaSelected.porcentaje * parseInt(precio)) / 100 )+ parseInt(precio)
+                : parseInt(precio)}
             </Segment>
           </Grid.Column>
         </Grid.Row>

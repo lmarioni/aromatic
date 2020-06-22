@@ -376,8 +376,9 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
                   >
                     Precio total percibido por los clientes: $
                     {ivaSelected !== null && ivaSelected.porcentaje
-                      ? ivaSelected.porcentaje * precio
-                      : precio}
+                      ? (ivaSelected.porcentaje * parseInt(precio)) / 100 +
+                        parseInt(precio)
+                      : parseInt(precio)}
                   </Segment>
                 </Grid.Column>
               </Grid.Row>
