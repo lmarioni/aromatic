@@ -165,7 +165,9 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
       setLoadingButton(false);
       setLoading(false);
       setCreateMode(false);
-      handleSelected(parsedResponse.producto);
+      const newProduct = parsedResponse.producto;
+      newProduct.iva = ivaSelected;
+      handleSelected(newProduct);
     } else {
       setLoadingButton(false);
       setLoading(false);

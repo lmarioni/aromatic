@@ -91,7 +91,9 @@ const ProductCreationModal = ({ id, open, onClose }) => {
 
     if (parsedResponse.status === "success") {
       setLoadingButton(false);
-      handleCloseProductCreationModal(parsedResponse.producto);
+      const newProduct = parsedResponse.producto;
+      newProduct.iva = ivaSelected;
+      handleCloseProductCreationModal(newProduct);
     } else {
       handleCloseProductCreationModal();
       setLoadingButton(false);

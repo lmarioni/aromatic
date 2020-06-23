@@ -71,7 +71,7 @@ export const Reports = () => {
     const response = await fetch(
       `${process.env.REACT_APP_BASE_URL}/facturas?desde=${startDate.format(
         "DD-MM-YYYY"
-      )}&hasta=${startDate.format("DD-MM-YYYY")}${
+      )}&hasta=${endDate.format("DD-MM-YYYY")}${
         client ? `&idcliente=${client.id}` : ""
       }`,
       requestOptions

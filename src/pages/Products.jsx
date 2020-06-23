@@ -43,6 +43,7 @@ export const Products = () => {
   };
 
   const mergeProducts = (newProduct = {}) => {
+    console.log(newProduct);
     const new_products = products.concat(newProduct);
     setProducts(new_products);
   };
