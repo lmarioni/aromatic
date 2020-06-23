@@ -8,6 +8,8 @@ import {
   Modal,
   Message,
   Tab,
+  Form,
+  FormGroup,
 } from "semantic-ui-react";
 import { ExcelRenderer } from "react-excel-renderer";
 import { Context } from "../../../Context";
@@ -20,6 +22,19 @@ const AssignClientsModal = ({ id, open, onClose }) => {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [collapsedInfo, setCollapsedInfo] = useState(true);
   const [uploaderMode, setUploaderMode] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [codigo, setCodigo] = useState("");
+  const [cif, setCif] = useState("");
+  const [nombreFantasia, setNombreFantasia] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [direccion, setDireccion] = useState("");
+  const [localidad, setLocalidad] = useState("");
+  const [provincia, setProvincia] = useState("");
+  const [cpostal, setCpostal] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [telefono2, setTelefono2] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(function () {
     resetForm();
@@ -28,7 +43,20 @@ const AssignClientsModal = ({ id, open, onClose }) => {
   const resetForm = () => {
     setCollapsedInfo(true);
     setUploadingFile(false);
+    setActiveIndex(0);
     setNewClients([]);
+    setCodigo("");
+    setCif("");
+    setNombreFantasia("");
+    setNombre("");
+    setApellido("");
+    setDireccion("");
+    setLocalidad("");
+    setProvincia("");
+    setCpostal("");
+    setTelefono("");
+    setTelefono2("");
+    setEmail("");
   };
 
   const handleRemoveRow = (row, index) => {
@@ -85,6 +113,27 @@ const AssignClientsModal = ({ id, open, onClose }) => {
 
   const handleSubmitAssignClients = async () => {
     setLoadingButton(true);
+
+    const parsedBody =
+      activeIndex === 0
+        ? JSON.stringify(newClients)
+        : JSON.stringify([
+            {
+              idruta: id,
+              codigo,
+              cif,
+              nombreFantasia,
+              nombre,
+              apellido,
+              direccion,
+              localidad,
+              provincia,
+              cpostal,
+              telefono,
+              telefono2,
+              email,
+            },
+          ]);
     const requestOptions = {
       method: "POST",
       headers: new Headers({
@@ -92,7 +141,7 @@ const AssignClientsModal = ({ id, open, onClose }) => {
         Accept: "application/json",
         "Content-Type": "application/json",
       }),
-      body: JSON.stringify(newClients),
+      body: parsedBody,
     };
 
     const response = await fetch(
@@ -164,7 +213,128 @@ const AssignClientsModal = ({ id, open, onClose }) => {
       )}
     </div>
   );
-
+  const renderNew = () => (
+    <Form>
+      <FormGroup widths="equal">
+        <Form.Input
+          fluid
+          value={codigo}
+          onChange={(e, { value }) => {
+            setCodigo(value);
+          }}
+          label="Código"
+          placeholder="Código"
+        />
+        <Form.Input
+          fluid
+          value={cif}
+          onChange={(e, { value }) => {
+            setCif(value);
+          }}
+          label="CIF"
+          placeholder="CIF"
+        />
+      </FormGroup>
+      <FormGroup widths="equal">
+        <Form.Input
+          fluid
+          value={nombreFantasia}
+          onChange={(e, { value }) => {
+            setNombreFantasia(value);
+          }}
+          required
+          label="Nombre Fantasia"
+          placeholder="Nombre de fantasía"
+        />
+        <Form.Input
+          fluid
+          value={nombre}
+          onChange={(e, { value }) => {
+            setNombre(value);
+          }}
+          required
+          label="Nombre"
+          placeholder="Nombre"
+        />
+        <Form.Input
+          fluid
+          value={apellido}
+          onChange={(e, { value }) => {
+            setApellido(value);
+          }}
+          label="Apellido"
+          placeholder="Apellido"
+        />
+      </FormGroup>
+      <FormGroup widths="equal">
+        <Form.Input
+          fluid
+          value={direccion}
+          onChange={(e, { value }) => {
+            setDireccion(value);
+          }}
+          label="Direccion"
+          placeholder="Direccion"
+        />
+        <Form.Input
+          fluid
+          value={localidad}
+          onChange={(e, { value }) => {
+            setLocalidad(value);
+          }}
+          label="Localidad"
+          placeholder="Localidad"
+        />
+        <Form.Input
+          fluid
+          value={provincia}
+          onChange={(e, { value }) => {
+            setProvincia(value);
+          }}
+          label="Provincia"
+          placeholder="Provincia"
+        />
+        <Form.Input
+          fluid
+          value={cpostal}
+          onChange={(e, { value }) => {
+            setCpostal(value);
+          }}
+          label="Código postal"
+          placeholder="CPostal"
+        />
+      </FormGroup>
+      <FormGroup widths="equal">
+        <Form.Input
+          fluid
+          value={telefono}
+          onChange={(e, { value }) => {
+            setTelefono(value);
+          }}
+          label="Telefono"
+          placeholder="Telefono"
+        />
+        <Form.Input
+          fluid
+          value={telefono2}
+          onChange={(e, { value }) => {
+            setTelefono2(value);
+          }}
+          label="Telefono2"
+          placeholder="Telefono alternativo"
+        />
+        <Form.Input
+          fluid
+          value={email}
+          onChange={(e, { value }) => {
+            setEmail(value);
+          }}
+          label="Email"
+          placeholder="Email"
+        />
+      </FormGroup>
+    </Form>
+  );
   const renderUploader = () => (
     <div>
       <div className="action-container space-between">
@@ -230,13 +400,23 @@ const AssignClientsModal = ({ id, open, onClose }) => {
       menuItem: "Importador",
       render: () => <Tab.Pane>{renderUploader()}</Tab.Pane>,
     },
+    {
+      menuItem: "Crear nuevo",
+      render: () => <Tab.Pane>{renderNew()}</Tab.Pane>,
+    },
   ];
 
   return (
     <Modal size="small" open={open}>
       <Header content="Asignar clientes a la ruta" />
       <Modal.Content scrolling>
-        <Tab panes={panes} />
+        <Tab
+          activeIndex={activeIndex}
+          onTabChange={(e, data) => {
+            setActiveIndex(data.activeIndex);
+          }}
+          panes={panes}
+        />
       </Modal.Content>
       <Modal.Actions>
         <Button
@@ -248,7 +428,11 @@ const AssignClientsModal = ({ id, open, onClose }) => {
           <Icon name="remove" /> Cancelar
         </Button>
         <Button
-          disabled={!newClients || !newClients.length}
+          disabled={
+            activeIndex === 0
+              ? !newClients || !newClients.length
+              : !nombre && !nombreFantasia
+          }
           primary
           onClick={handleSubmitAssignClients}
           loading={loadingButton}
