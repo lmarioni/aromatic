@@ -105,14 +105,7 @@ const EditClientModal = ({ id, open, onClose, client = {} }) => {
       setLoadingButton(false);
 
       const editedClient = {
-        ...parsedResponse.cliente,
-        ...{
-          facturar: client.facturar,
-          idproducto: client.idproducto,
-          precio: client.precio,
-          precioCosto: client.precioCosto,
-          productos: client.productos,
-        },
+        ...parsedResponse.cliente
       };
       handleCloseEditClient(editedClient);
     } else {
