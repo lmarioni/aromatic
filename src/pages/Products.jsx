@@ -137,9 +137,9 @@ export const Products = () => {
       <Confirm
         open={showConfirmationDelete}
         header="Eliminar producto"
-        content="Esta acción eliminará el producto"
+        content="ATENCIÓN!!! ¿Estás seguro que quieres eliminar este producto? "
         confirmButton="Si, eliminar"
-        cancelButton="No, volver"
+        cancelButton="Cancelar"
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmationDelete}
       />

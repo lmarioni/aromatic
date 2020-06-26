@@ -423,6 +423,7 @@ export const RouteDetail = () => {
     <div>
       <Icon
         name="trash"
+        style={{color: 'red', cursor: 'pointer', marginRight: 20}}
         onClick={() => {
           setClientToDelete(client);
           setShowConfirmationDelete(true);
@@ -430,6 +431,7 @@ export const RouteDetail = () => {
       />
       <Icon
         name="edit"
+        style={{cursor: 'pointer'}}
         onClick={() => {
           setClientToEdit(client);
           setShowEditClientModal(true);
@@ -517,7 +519,7 @@ export const RouteDetail = () => {
             size="small"
             celled
             selectable
-            style={{ overflowX: "auto", overflowY: "hidden" }}
+            style={{ overflowX: "auto", overflowY: "hidden", marginBottom: 30 }}
           >
             <Table.Header>
               <Table.Row>

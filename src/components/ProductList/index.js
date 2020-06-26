@@ -39,6 +39,7 @@ const ProductList = ({ productList = [], handleDelete = null }) => {
   const renderActions = (prodId) => (
     <Icon
       name="trash"
+      style={{cursor: 'pointer', color: 'red'}}
       onClick={() => {
         handleDelete(prodId);
       }}
@@ -47,7 +48,7 @@ const ProductList = ({ productList = [], handleDelete = null }) => {
 
   const renderProducts = () => {
     return (
-      <Table size="small" celled selectable>
+      <Table size="small" celled selectable style={{marginBottom: 40}}>
         <Table.Header>
           <Table.Row>
             {columns.map((column, index) => {
@@ -66,7 +67,7 @@ const ProductList = ({ productList = [], handleDelete = null }) => {
               <Table.Row key={`product${product.id}row`}>
                 {columns.map((column) => {
                   return (
-                    <Table.Cell key={`${product.id}[${column.label}]`}>
+                    <Table.Cell style={{textAlign: 'center'}} key={`${product.id}[${column.label}]`}>
                       {column.key !== "acciones"
                         ? product[column.key]
                         : renderActions(product.id)}
