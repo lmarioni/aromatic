@@ -9,6 +9,7 @@ import {
   Button,
   Dimmer,
   Loader,
+  Confirm,
 } from "semantic-ui-react";
 import { Context } from "../Context";
 import ProductList from "../components/ProductList";
@@ -21,6 +22,8 @@ export const Products = () => {
     false
   );
   const [products, setProducts] = useState([]);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [showConfirmationDelete, setShowConfirmationDelete] = useState(false);
 
   useEffect(function () {
     fetchProducts();
@@ -43,7 +46,6 @@ export const Products = () => {
   };
 
   const mergeProducts = (newProduct = {}) => {
-    console.log(newProduct);
     const new_products = products.concat(newProduct);
     setProducts(new_products);
   };
@@ -54,6 +56,45 @@ export const Products = () => {
     }
     setShowProductCreationModal(false);
   };
+
+  const handleRemoveProduct = async () => {
+    setLoading(true);
+    const prodId = productToDelete;
+    const requestOptions = {
+      method: "DELETE",
+      headers: new Headers({
+        authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      }),
+    };
+    const response = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/productos/${prodId}`,
+      requestOptions
+    );
+
+    const parsedResponse = await response.json();
+
+    if (parsedResponse.status === "success") {
+      setLoading(false);
+      const filProds = products.filter((prod) => prod.id !== prodId);
+      setProducts(filProds);
+      setShowConfirmationDelete(false);
+    } else {
+      setLoading(false);
+      setShowConfirmationDelete(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setProductToDelete(null);
+    setShowConfirmationDelete(false);
+  };
+
+  const handleConfirmationDelete = () => {
+    handleRemoveProduct();
+  };
+
   const renderNoProducts = () => (
     <div>
       <Segment placeholder textAlign="center">
@@ -65,7 +106,7 @@ export const Products = () => {
           <Button
             primary
             onClick={() => {
-              console.log("abrir modal ?");
+              setShowProductCreationModal(true);
             }}
           >
             Crear producto
@@ -81,10 +122,27 @@ export const Products = () => {
     </Dimmer>
   );
 
-  const renderProducts = () => <ProductList productList={products} />;
+  const renderProducts = () => (
+    <ProductList
+      handleDelete={(prodId) => {
+        setProductToDelete(prodId);
+        setShowConfirmationDelete(true);
+      }}
+      productList={products}
+    />
+  );
 
   return (
     <div>
+      <Confirm
+        open={showConfirmationDelete}
+        header="Eliminar producto"
+        content="Esta acción eliminará el producto"
+        confirmButton="Si, eliminar"
+        cancelButton="No, volver"
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmationDelete}
+      />
       <ProductCreationModal
         open={showProductCreationModal}
         onClose={handleCloseProductCreationModal}

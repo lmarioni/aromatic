@@ -32,6 +32,7 @@ import "react-dates/lib/css/_datepicker.css";
 import { SingleDatePicker } from "react-dates";
 import { defaultColumns } from "../utils/initColumns";
 import { SingleDatePickerPhrases } from "../utils/localeCalendarPhrases";
+import EditClientModal from "../modals/Clients/EditClient";
 
 export const RouteDetail = () => {
   const [id, setId] = useState(0);
@@ -55,6 +56,10 @@ export const RouteDetail = () => {
   const [serie, setSerie] = useState(0);
   const [printBilling, setPrintBilling] = useState(true);
   const [realColumnCount, setRealColumnCount] = useState(0);
+  const [clientToDelete, setClientToDelete] = useState({});
+  const [showConfirmationDelete, setShowConfirmationDelete] = useState(false);
+  const [showEditClientModal, setShowEditClientModal] = useState(false);
+  const [clientToEdit, setClientToEdit] = useState({});
 
   useEffect(function () {
     if (params && params.length) {
@@ -132,18 +137,20 @@ export const RouteDetail = () => {
     };
     const prodArr = await (await fetchProducts(data)).json();
     setProducts(prodArr);
-    const clientsArr = await (await fetchClients({ data, id, q })).json();
-    const parsedClients = clientsArr.map((client) => {
-      client.productos = [{ producto: prodArr[0], cantidad: 1 }];
-      client.idproducto = [prodArr[0].id];
-      client.nombreproducto = prodArr[0].nombre;
-      client.precio = prodArr[0].precio;
-      client.precioCosto = prodArr[0].precioCosto;
-      client.facturar = true;
-      return client;
-    });
-    setClients(parsedClients);
-    setFilteredClients(parsedClients);
+    if (prodArr.length) {
+      const clientsArr = await (await fetchClients({ data, id, q })).json();
+      const parsedClients = clientsArr.map((client) => {
+        client.productos = [{ producto: prodArr[0], cantidad: 1 }];
+        client.idproducto = [prodArr[0].id];
+        client.nombreproducto = prodArr[0].nombre;
+        client.precio = prodArr[0].precio;
+        client.precioCosto = prodArr[0].precioCosto;
+        client.facturar = true;
+        return client;
+      });
+      setClients(parsedClients);
+      setFilteredClients(parsedClients);
+    }
     setLoading(false);
   };
 
@@ -174,12 +181,14 @@ export const RouteDetail = () => {
   const mergeRoutes = (newRoutes = []) => {
     const new_clients = clients.concat(newRoutes);
     const parsedClients = new_clients.map((client) => {
-      client.productos = [{ producto: products[0], cantidad: 1 }];
-      client.idproducto = [products[0].id];
-      client.nombreproducto = products[0].nombre;
-      client.precio = products[0].precio;
-      client.precioCosto = products[0].precioCosto;
-      client.facturar = true;
+      if (products.length) {
+        client.productos = [{ producto: products[0], cantidad: 1 }];
+        client.idproducto = [products[0].id];
+        client.nombreproducto = products[0].nombre;
+        client.precio = products[0].precio;
+        client.precioCosto = products[0].precioCosto;
+        client.facturar = true;
+      }
       return client;
     });
     setClients(parsedClients);
@@ -215,6 +224,34 @@ export const RouteDetail = () => {
   const handleCloseAssignClientsModal = (newRoutes = []) => {
     mergeRoutes(newRoutes);
     setShowAssignModalClients(false);
+  };
+
+  const handleCloseEditClientsModal = (editedClient = {}) => {
+    setShowEditClientModal(false);
+    setClientToEdit({});
+
+    if (editedClient && Object.keys(editedClient).length) {
+      const mappedClients = clients.map((client)=>{
+        if(client.id === editedClient.id){
+          client.idruta = editedClient.idruta;
+          client.codigo = editedClient.codigo;
+          client.cif = editedClient.cif;
+          client.nombreFantasia = editedClient.nombreFantasia;
+          client.nombre = editedClient.nombre;
+          client.apellido = editedClient.apellido;
+          client.direccion = editedClient.direccion;
+          client.localidad = editedClient.localidad;
+          client.provincia = editedClient.provincia;
+          client.cpostal = editedClient.cpostal;
+          client.telefono = editedClient.telefono;
+          client.telefono2 = editedClient.telefono2;
+          client.email = editedClient.email;
+        }
+        return client;
+      });
+      setClients(mappedClients);
+      setFilteredClients(mappedClients);
+    }
   };
 
   const handleCloseProductModal = (newProductList = []) => {
@@ -298,14 +335,6 @@ export const RouteDetail = () => {
     setLoading(false);
   };
 
-  const handleCancel = () => {
-    setShowConfirmation(false);
-  };
-
-  const handleConfirmation = () => {
-    setShowPrintBillingModal(true);
-  };
-
   const handleTogglePrintBilling = (action) => {
     setPrintBilling(action);
     const parsedFilteredClients = filteredClients.map((client) => {
@@ -313,6 +342,52 @@ export const RouteDetail = () => {
       return client;
     });
     setFilteredClients(parsedFilteredClients);
+  };
+
+  const handleRemoveClient = async () => {
+    const clientId = clientToDelete.id;
+    setLoading(true);
+    const requestOptions = {
+      method: "DELETE",
+      headers: new Headers({
+        authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      }),
+    };
+    const response = await fetch(
+      `${process.env.REACT_APP_BASE_URL}/clientes/${clientId}`,
+      requestOptions
+    );
+
+    const parsedResponse = await response.json();
+
+    if (parsedResponse.status === "success") {
+      setLoading(false);
+      const filClients = clients.filter((client) => client.id !== clientId);
+      setClients(filClients);
+      setFilteredClients(filClients);
+      setShowConfirmationDelete(false);
+    } else {
+      setShowConfirmationDelete(false);
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowConfirmation(false);
+  };
+
+  const handleConfirmation = () => {
+    setShowPrintBillingModal(true);
+  };
+  const handleCancelDelete = () => {
+    setClientToDelete({});
+    setShowConfirmationDelete(false);
+  };
+
+  const handleConfirmationDelete = () => {
+    handleRemoveClient();
   };
 
   const renderDatePicker = () => (
@@ -343,6 +418,26 @@ export const RouteDetail = () => {
       slider
     />
   );
+
+  const renderActions = (client = {}) => (
+    <div>
+      <Icon
+        name="trash"
+        onClick={() => {
+          setClientToDelete(client);
+          setShowConfirmationDelete(true);
+        }}
+      />
+      <Icon
+        name="edit"
+        onClick={() => {
+          setClientToEdit(client);
+          setShowEditClientModal(true);
+        }}
+      />
+    </div>
+  );
+
   const renderProductInTable = (client = {}, productName = "") => (
     <Button as="div" labelPosition="left">
       <Label as="a" basic>
@@ -386,7 +481,11 @@ export const RouteDetail = () => {
 
   const renderClients = () => {
     return (
-      <Container fluid={realColumnCount > 10} textAlign="center" className="mh-vh-100">
+      <Container
+        fluid={realColumnCount > 10}
+        textAlign="center"
+        className="mh-vh-100"
+      >
         <Grid>
           <Grid.Column width={4} floated="left">
             <Input
@@ -413,73 +512,93 @@ export const RouteDetail = () => {
             </Button>
           </Grid.Column>
         </Grid>
-        <Table size="small" celled selectable>
-          <Table.Header>
-            <Table.Row>
-              {columns.map((column, index) => {
-                if (column.display) {
-                  return (
-                    <Table.HeaderCell key={`main-column-${column}-${index}`}>
-                      {column.key === "facturar" ? (
-                        <Button.Group>
-                          <Button
-                            positive
-                            onClick={() => {
-                              handleTogglePrintBilling(true);
-                            }}
-                          >
-                            Facturar
-                          </Button>
-                          <Button.Or text="o" />
-                          <Button
-                            onClick={() => {
-                              handleTogglePrintBilling(false);
-                            }}
-                          >
-                            No facturar
-                          </Button>
-                        </Button.Group>
-                      ) : (
-                        column.label
-                      )}
-                    </Table.HeaderCell>
-                  );
-                }
-              })}
-            </Table.Row>
-          </Table.Header>
+        <Grid style={{ overflowX: "auto", overflowY: "hidden" }}>
+          <Table
+            size="small"
+            celled
+            selectable
+            style={{ overflowX: "auto", overflowY: "hidden" }}
+          >
+            <Table.Header>
+              <Table.Row>
+                {columns.map((column, index) => {
+                  if (column.display) {
+                    return (
+                      <Table.HeaderCell
+                        collapsing
+                        key={`main-column-${column}-${index}`}
+                      >
+                        {column.key === "facturar" ? (
+                          <Button.Group>
+                            <Button
+                              positive
+                              onClick={() => {
+                                handleTogglePrintBilling(true);
+                              }}
+                            >
+                              Facturar
+                            </Button>
+                            <Button.Or text="o" />
+                            <Button
+                              onClick={() => {
+                                handleTogglePrintBilling(false);
+                              }}
+                            >
+                              No facturar
+                            </Button>
+                          </Button.Group>
+                        ) : (
+                          column.label
+                        )}
+                      </Table.HeaderCell>
+                    );
+                  }
+                })}
+              </Table.Row>
+            </Table.Header>
 
-          <Table.Body>
-            {filteredClients.map((client) => {
-              return (
-                <Table.Row key={`client${client.id}row`}>
-                  {columns.map((column) => {
-                    if (column.display) {
-                      return (
-                        <Table.Cell
-                          key={`row-${client.id}[${column.label}]`}
-                          className={`${column.key}`}
-                        >
-                          {column.key === "nombreproducto"
-                            ? renderProductInTable(client, client[column.key])
-                            : column.key === "facturar"
-                            ? renderBillCheckbox(client)
-                            : client[column.key]}
-                        </Table.Cell>
-                      );
-                    }
-                  })}
-                </Table.Row>
-              );
-            })}
-          </Table.Body>
-        </Table>
+            <Table.Body>
+              {filteredClients.map((client) => {
+                return (
+                  <Table.Row key={`client${client.id}row`}>
+                    {columns.map((column, index) => {
+                      if (column.display) {
+                        return (
+                          <Table.Cell
+                            key={`row-${client.id}[${column.label}]- ${index}`}
+                          >
+                            {column.key === "acciones"
+                              ? renderActions(client)
+                              : column.key === "nombreproducto"
+                              ? renderProductInTable(client, client[column.key])
+                              : column.key === "facturar"
+                              ? renderBillCheckbox(client)
+                              : client[column.key]}
+                          </Table.Cell>
+                        );
+                      }
+                    })}
+                  </Table.Row>
+                );
+              })}
+            </Table.Body>
+          </Table>
+        </Grid>
       </Container>
     );
   };
 
   return (
     <div>
+      <Confirm
+        open={showConfirmationDelete}
+        header="Eliminar cliente"
+        content="Esta acción eliminará al cliente"
+        confirmButton="Si, eliminar"
+        cancelButton="No, volver"
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmationDelete}
+      />
       <Confirm
         open={showConfirmation}
         header="Imprimir facturas"
@@ -511,10 +630,16 @@ export const RouteDetail = () => {
         open={showAssignModalClients}
         onClose={handleCloseAssignClientsModal}
       />
+      <EditClientModal
+        id={id}
+        open={showEditClientModal}
+        client={clientToEdit}
+        onClose={handleCloseEditClientsModal}
+      />
       <Container
-        style={{ marginTop: "7em", overflowX: "auto", overflowY: "hidden" }}
+        style={{ marginTop: "7em", width: realColumnCount > 9 ? "90%" : "" }}
         textAlign="center"
-        minHeight="100%"
+        minheight="100%"
       >
         <Header as="h1" inverted textAlign="center">
           Listado de clientes
@@ -535,7 +660,7 @@ export const RouteDetail = () => {
             </Button>
           </Grid.Column>
           <Grid.Column floated="right" width={5}>
-            <Link class="ui primary button" to={`/facturas/rutas/${id}`}>
+            <Link className="ui primary button" to={`/facturas/rutas/${id}`}>
               Ver Historial
             </Link>
             <Button

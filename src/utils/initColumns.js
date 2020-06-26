@@ -17,4 +17,5 @@ export const defaultColumns = [
   { display: false, key: "telefono", label: "telefono" },
   { display: false, key: "telefono2", label: "telefono2" },
   { display: false, key: "email", label: "email" },
+  { display: true, key: "acciones", label: "acciones" }
 ];

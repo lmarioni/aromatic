@@ -44,7 +44,7 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
 
   useEffect(
     function () {
-      if (client && Object.keys(client).length) {
+      if (client && Object.keys(client).length && client.productos && client.productos.length) {
         const prods = client.productos.map(({ producto, cantidad }, index) => {
           return {
             producto: producto,

@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Table } from "semantic-ui-react";
-import { Context } from "../../Context";
+import { Table, Icon, Dimmer, Loader } from "semantic-ui-react";
 import "./styles.scss";
 
 const columns = [
@@ -9,34 +8,41 @@ const columns = [
   { key: "precio", label: "Precio" },
   { key: "precioCosto", label: "Costo" },
   { key: "iva", label: "iva" },
-  { key: "descripcion", label: "Descripcion" }
+  { key: "descripcion", label: "Descripcion" },
+  { key: "acciones", label: "Acciones" },
 ];
 
-const ProductList = ({ productList = [] }) => {
-  const { token } = useContext(Context);
+const ProductList = ({ productList = [], handleDelete = null }) => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
 
-  useEffect(
-    function () {
-      if (productList) {
-        const parsedProducts = productList.map((prod) => {
-          return {
-            codigo: prod.codigo,
-            descripcion: prod.descripcion,
-            id: prod.id,
-            nombre: prod.nombre,
-            precio: prod.precio,
-            precioCosto: prod.precioCosto,
-            userid: prod.userid,
-            iva: prod.iva?.texto,
-          };
-        });
-        setProducts(parsedProducts);
-        setFilteredProducts(parsedProducts);
-      }
-    },
-    [productList]
+  useEffect(() => {
+    console.log(handleDelete);
+    if (productList) {
+      const parsedProducts = productList.map((prod) => {
+        return {
+          codigo: prod.codigo,
+          descripcion: prod.descripcion,
+          id: prod.id,
+          nombre: prod.nombre,
+          precio: prod.precio,
+          precioCosto: prod.precioCosto,
+          userid: prod.userid,
+          iva: prod.iva?.texto,
+        };
+      });
+      setProducts(parsedProducts);
+      setFilteredProducts(parsedProducts);
+    }
+  }, [productList]);
+
+  const renderActions = (prodId) => (
+    <Icon
+      name="trash"
+      onClick={() => {
+        handleDelete(prodId);
+      }}
+    />
   );
 
   const renderProducts = () => {
@@ -61,7 +67,9 @@ const ProductList = ({ productList = [] }) => {
                 {columns.map((column) => {
                   return (
                     <Table.Cell key={`${product.id}[${column.label}]`}>
-                      {product[column.key]}
+                      {column.key !== "acciones"
+                        ? product[column.key]
+                        : renderActions(product.id)}
                     </Table.Cell>
                   );
                 })}
@@ -73,7 +81,7 @@ const ProductList = ({ productList = [] }) => {
     );
   };
 
-  return <div>{filteredProducts.length && renderProducts()}</div>;
+  return <div>{filteredProducts.length ? renderProducts() : null}</div>;
 };
 
 export default ProductList;
