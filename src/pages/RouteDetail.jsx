@@ -16,23 +16,31 @@ import {
   Input,
   Checkbox,
   Confirm,
+  Ref,
 } from "semantic-ui-react";
-
 import { useLocation, Link } from "@reach/router";
 import Cookies from "js-cookie";
+import "moment/locale/es";
+import "react-dates/initialize";
+import "react-dates/lib/css/_datepicker.css";
+import { SingleDatePicker } from "react-dates";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+
 import AssignClientsModal from "../modals/Clients/AssignClients";
 import TableSettingsModal from "../modals/Clients/TableSettings";
 import { searchInArr } from "../utils";
 import PrintBillingModal from "../modals/Billing";
 import SearchProductModal from "../modals/SearchProducts";
 
-import "moment/locale/es";
-import "react-dates/initialize";
-import "react-dates/lib/css/_datepicker.css";
-import { SingleDatePicker } from "react-dates";
 import { defaultColumns } from "../utils/initColumns";
 import { SingleDatePickerPhrases } from "../utils/localeCalendarPhrases";
 import EditClientModal from "../modals/Clients/EditClient";
+
+const getItemStyle = (isDragging, draggableStyle) => ({
+  display: isDragging ? "table" : "",
+
+  ...draggableStyle,
+});
 
 export const RouteDetail = () => {
   const [id, setId] = useState(0);
@@ -107,6 +115,29 @@ export const RouteDetail = () => {
   const handleRealColumnCount = (cols = columns) => {
     const count = cols.reduce((sum, col) => sum + (col.display ? 1 : 0), 0);
     setRealColumnCount(count);
+  };
+
+  const onDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    const reOrderer_clients = Object.assign([], filteredClients);
+    const reOrderer_client = filteredClients[source.index];
+    reOrderer_clients.splice(source.index, 1);
+    reOrderer_clients.splice(destination.index, 0, reOrderer_client);
+
+    setFilteredClients(reOrderer_clients);
+    console.log("reorderer");
   };
 
   const fetchBillingInfo = () => {
@@ -231,8 +262,8 @@ export const RouteDetail = () => {
     setClientToEdit({});
 
     if (editedClient && Object.keys(editedClient).length) {
-      const mappedClients = clients.map((client)=>{
-        if(client.id === editedClient.id){
+      const mappedClients = clients.map((client) => {
+        if (client.id === editedClient.id) {
           client.idruta = editedClient.idruta;
           client.codigo = editedClient.codigo;
           client.cif = editedClient.cif;
@@ -423,7 +454,7 @@ export const RouteDetail = () => {
     <div>
       <Icon
         name="trash"
-        style={{color: 'red', cursor: 'pointer', marginRight: 20}}
+        style={{ color: "red", cursor: "pointer", marginRight: 20 }}
         onClick={() => {
           setClientToDelete(client);
           setShowConfirmationDelete(true);
@@ -431,7 +462,7 @@ export const RouteDetail = () => {
       />
       <Icon
         name="edit"
-        style={{cursor: 'pointer'}}
+        style={{ cursor: "pointer" }}
         onClick={() => {
           setClientToEdit(client);
           setShowEditClientModal(true);
@@ -515,76 +546,116 @@ export const RouteDetail = () => {
           </Grid.Column>
         </Grid>
         <Grid style={{ overflowX: "auto", overflowY: "hidden" }}>
-          <Table
-            size="small"
-            celled
-            selectable
-            style={{ overflowX: "auto", overflowY: "hidden", marginBottom: 30 }}
-          >
-            <Table.Header>
-              <Table.Row>
-                {columns.map((column, index) => {
-                  if (column.display) {
-                    return (
-                      <Table.HeaderCell
-                        collapsing
-                        key={`main-column-${column}-${index}`}
-                      >
-                        {column.key === "facturar" ? (
-                          <Button.Group>
-                            <Button
-                              positive
-                              onClick={() => {
-                                handleTogglePrintBilling(true);
-                              }}
-                            >
-                              Facturar
-                            </Button>
-                            <Button.Or text="o" />
-                            <Button
-                              onClick={() => {
-                                handleTogglePrintBilling(false);
-                              }}
-                            >
-                              No facturar
-                            </Button>
-                          </Button.Group>
-                        ) : (
-                          column.label
-                        )}
-                      </Table.HeaderCell>
-                    );
-                  }
-                })}
-              </Table.Row>
-            </Table.Header>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Table
+              size="small"
+              celled
+              selectable
+              style={{
+                overflowX: "auto",
+                overflowY: "hidden",
+                marginBottom: 30,
+              }}
+            >
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell collapsing key={`main-column-handle`}>
+                    {""}
+                  </Table.HeaderCell>
+                  {columns.map((column, index) => {
+                    if (column.display) {
+                      return (
+                        <Table.HeaderCell
+                          collapsing
+                          key={`main-column-${column}-${index}`}
+                        >
+                          {column.key === "facturar" ? (
+                            <Button.Group>
+                              <Button
+                                positive
+                                onClick={() => {
+                                  handleTogglePrintBilling(true);
+                                }}
+                              >
+                                Facturar
+                              </Button>
+                              <Button.Or text="o" />
+                              <Button
+                                onClick={() => {
+                                  handleTogglePrintBilling(false);
+                                }}
+                              >
+                                No facturar
+                              </Button>
+                            </Button.Group>
+                          ) : (
+                            column.label
+                          )}
+                        </Table.HeaderCell>
+                      );
+                    }
+                  })}
+                </Table.Row>
+              </Table.Header>
 
-            <Table.Body>
-              {filteredClients.map((client) => {
-                return (
-                  <Table.Row key={`client${client.id}row`}>
-                    {columns.map((column, index) => {
-                      if (column.display) {
-                        return (
-                          <Table.Cell
-                            key={`row-${client.id}[${column.label}]- ${index}`}
-                          >
-                            {column.key === "acciones"
-                              ? renderActions(client)
-                              : column.key === "nombreproducto"
-                              ? renderProductInTable(client, client[column.key])
-                              : column.key === "facturar"
-                              ? renderBillCheckbox(client)
-                              : client[column.key]}
-                          </Table.Cell>
-                        );
-                      }
-                    })}
-                  </Table.Row>
-                );
-              })}
-            </Table.Body>
-          </Table>
+              <Droppable droppableId="tableBody">
+                {(provided, snapshot) => (
+                  <Ref innerRef={provided.innerRef}>
+                    <Table.Body {...provided.droppableProps}>
+                      {filteredClients.map((client, index) => (
+                        <Draggable
+                          draggableId={`${client.id}-${client.codigo}`}
+                          index={index}
+                          key={client.id}
+                        >
+                          {(provided, snapshot) => (
+                            <Ref innerRef={provided.innerRef}>
+                              <Table.Row
+                                key={`client${client.id}row`}
+                                {...provided.draggableProps}
+                                style={getItemStyle(
+                                  snapshot.isDragging,
+                                  provided.draggableProps.style
+                                )}
+                              >
+                                <Table.Cell>
+                                  <Icon
+                                    name="grab"
+                                    {...provided.dragHandleProps}
+                                  />
+                                </Table.Cell>
+                                {columns.map((column, index) => {
+                                  if (column.display) {
+                                    return (
+                                      <Table.Cell
+                                        key={`row-${client.id}[${column.label}]- ${index}`}
+                                      >
+                                        {column.key === "acciones"
+                                          ? renderActions(client)
+                                          : column.key === "nombreproducto"
+                                          ? renderProductInTable(
+                                              client,
+                                              client[column.key]
+                                            )
+                                          : column.key === "facturar"
+                                          ? renderBillCheckbox(client)
+                                          : client[column.key]}
+                                      </Table.Cell>
+                                    );
+                                  }
+                                })}
+                              </Table.Row>
+                            </Ref>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </Table.Body>
+                  </Ref>
+                )}
+              </Droppable>
+            </Table>
+          </DragDropContext>
         </Grid>
       </Container>
     );
