@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Table, Icon, Dimmer, Loader } from "semantic-ui-react";
+import { Table, Icon } from "semantic-ui-react";
 import "./styles.scss";
 
 const columns = [
@@ -12,7 +12,7 @@ const columns = [
   { key: "acciones", label: "Acciones" },
 ];
 
-const ProductList = ({ productList = [], handleDelete = null }) => {
+const ProductList = ({ productList = [], handleDelete = null, handleEdit = null }) => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
 
@@ -36,13 +36,22 @@ const ProductList = ({ productList = [], handleDelete = null }) => {
   }, [productList]);
 
   const renderActions = (prodId) => (
-    <Icon
-      name="trash"
-      style={{cursor: 'pointer', color: 'red'}}
-      onClick={() => {
-        handleDelete(prodId);
-      }}
-    />
+    <div>
+      <Icon
+        name="trash"
+        style={{cursor: 'pointer', color: 'red'}}
+        onClick={() => {
+          handleDelete(prodId);
+        }}
+      />
+      <Icon
+        name="edit"
+        style={{cursor: 'pointer'}}
+        onClick={() => {
+          handleEdit(prodId);
+        }}
+      />
+    </div>
   );
 
   const renderProducts = () => {
@@ -63,7 +72,7 @@ const ProductList = ({ productList = [], handleDelete = null }) => {
         <Table.Body>
           {filteredProducts.map((product) => {
             return (
-              <Table.Row key={`product${product.id}row`}>
+              <Table.Row key={`product-${product.id}row`}>
                 {columns.map((column) => {
                   return (
                     <Table.Cell style={{textAlign: 'center'}} key={`${product.id}[${column.label}]`}>

@@ -22,6 +22,7 @@ export const Products = () => {
     false
   );
   const [products, setProducts] = useState([]);
+  const [productToEdit, setProductToEdit] = useState({});
   const [productToDelete, setProductToDelete] = useState(null);
   const [showConfirmationDelete, setShowConfirmationDelete] = useState(false);
 
@@ -46,7 +47,19 @@ export const Products = () => {
   };
 
   const mergeProducts = (newProduct = {}) => {
-    const new_products = products.concat(newProduct);
+    let new_products = [];
+    console.log(products.find((prod) => prod.id === newProduct.id));
+    if (products.find((prod) => prod.id === newProduct.id)) {
+      new_products = products.map((prod) => {
+        if (prod.id === newProduct.id) {
+          prod = newProduct;
+        }
+        return prod;
+      });
+    } else {
+      new_products = products.concat(newProduct);
+    }
+    setProductToEdit({});
     setProducts(new_products);
   };
 
@@ -128,6 +141,11 @@ export const Products = () => {
         setProductToDelete(prodId);
         setShowConfirmationDelete(true);
       }}
+      handleEdit={(prodId) => {
+        const editProd = products.find((prod) => prod.id === prodId);
+        setProductToEdit(editProd);
+        setShowProductCreationModal(true);
+      }}
       productList={products}
     />
   );
@@ -145,6 +163,7 @@ export const Products = () => {
       />
       <ProductCreationModal
         open={showProductCreationModal}
+        edit={productToEdit}
         onClose={handleCloseProductCreationModal}
       />
       <Container style={{ marginTop: "7em" }} textAlign="center">

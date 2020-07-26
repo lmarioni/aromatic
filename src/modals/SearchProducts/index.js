@@ -209,14 +209,9 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
   };
 
   const renderSearchResult = ({
-    codigo,
     descripcion,
-    id,
     nombre,
-    precio,
-    precioCosto,
-    iva,
-    userid,
+    precio
   }) => (
     <div>
       {loadingSearch || !nombre ? (

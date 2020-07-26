@@ -11,7 +11,7 @@ import {
 } from "semantic-ui-react";
 import { Context } from "../../Context";
 
-const ProductCreationModal = ({ id, open, onClose }) => {
+const ProductCreationModal = ({ id, open, onClose, edit = {} }) => {
   const { token } = useContext(Context);
   const [newProduct, setNewProduct] = useState([]);
   const [loadingButton, setLoadingButton] = useState(false);
@@ -25,10 +25,22 @@ const ProductCreationModal = ({ id, open, onClose }) => {
   const [ivaSelected, setIvaSelected] = useState(null);
   const [ivaList, setIvaList] = useState([]);
 
-  useEffect(function () {
+  useEffect(() => {
     fetchIva();
     resetForm();
   }, []);
+
+  useEffect(() => {
+    setCodigo(edit.codigo);
+    setPrecioCosto(edit.precioCosto);
+    setDescripcion(edit.descripcion);
+    setNombre(edit.nombre);
+    setPrecio(edit.precio);
+    if (edit.iva) {
+      setIva(edit.iva.id);
+      setIvaSelected(edit.iva);
+    }
+  }, [edit]);
 
   const fetchIva = () => {
     setLoading(true);
@@ -48,12 +60,12 @@ const ProductCreationModal = ({ id, open, onClose }) => {
 
   const resetForm = () => {
     setCodigo("");
-    setNombre("");
-    setDescripcion("");
-    setPrecio(0);
     setPrecioCosto(0);
-    setIva(null);
+    setDescripcion("");
+    setNombre("");
+    setPrecio(0);
     setIvaSelected(null);
+    setIva(null);
     setLoadingButton(false);
     setNewProduct([]);
   };
@@ -66,7 +78,7 @@ const ProductCreationModal = ({ id, open, onClose }) => {
   const handleSubmit = async (event) => {
     setLoadingButton(true);
     const requestOptions = {
-      method: "POST",
+      method: edit && edit.id ? "PUT" : "POST",
       headers: new Headers({
         authorization: `Bearer ${token}`,
         Accept: "application/json",
@@ -83,7 +95,7 @@ const ProductCreationModal = ({ id, open, onClose }) => {
     };
 
     const response = await fetch(
-      `${process.env.REACT_APP_BASE_URL}/productos`,
+      `${process.env.REACT_APP_BASE_URL}/productos${edit && edit.id ? `/${edit.id}` : ``}`,
       requestOptions
     );
 
@@ -91,7 +103,7 @@ const ProductCreationModal = ({ id, open, onClose }) => {
 
     if (parsedResponse.status === "success") {
       setLoadingButton(false);
-      const newProduct = parsedResponse.producto;
+      const newProduct = parsedResponse.producto.length ? parsedResponse.producto[0] : parsedResponse.producto;
       newProduct.iva = ivaSelected;
       handleCloseProductCreationModal(newProduct);
     } else {
@@ -214,7 +226,8 @@ const ProductCreationModal = ({ id, open, onClose }) => {
             >
               Precio total percibido por los clientes: $
               {ivaSelected !== null && ivaSelected.porcentaje
-                ?( (ivaSelected.porcentaje * parseInt(precio)) / 100 )+ parseInt(precio)
+                ? (ivaSelected.porcentaje * parseInt(precio)) / 100 +
+                  parseInt(precio)
                 : parseInt(precio)}
             </Segment>
           </Grid.Column>
