@@ -118,8 +118,8 @@ export const RouteDetail = () => {
 
     fetch(`${process.env.REACT_APP_BASE_URL}/configuracion/facturas`, data)
       .then((res) => res.json())
-      .then(({ fechaMinina, nserie, numeroFactura }) => {
-        const splitedDate = fechaMinina.split("-");
+      .then(({ fechaMinima, nserie, numeroFactura }) => {
+        const splitedDate = fechaMinima.split("-");
         const minDate = new Date(
           splitedDate[2],
           splitedDate[1] - 1,
