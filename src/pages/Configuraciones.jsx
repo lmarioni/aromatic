@@ -36,6 +36,7 @@ export const Configuraciones = () => {
     fetch(`${process.env.REACT_APP_BASE_URL}/configuracion/facturas`, data)
       .then((res) => res.json())
       .then((response) => {
+        console.log(response)
         setConfiguracion(response);
         setInput(response);
         setLoading(false);
@@ -111,6 +112,9 @@ export const Configuraciones = () => {
                   Si cambia el numero de serie, sus próximas facturas sandrán
                   con este numero de serie
                 </small>
+
+                <p> <b>Número de proxima factura para esta serie: </b> {configuracion.numeroFactura} </p>
+                <p> <b>Ultima fecha de facturacion para esta serie: </b> {configuracion.fechaMinima} </p>
               </div>
               {
                   respuesta.message &&
