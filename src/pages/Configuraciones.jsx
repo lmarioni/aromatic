@@ -71,7 +71,7 @@ export const Configuraciones = () => {
         .then((response) => {
         setSending(false)
             if(response.status === 'success'){
-                setRespuesta({class: 'positive', message: "Numero de serie ediato correctamente"})
+                setRespuesta({class: 'positive', message: "Numero de serie editado correctamente"})
             }else{
                 setRespuesta({class: 'error', message: response.message})
             }

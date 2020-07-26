@@ -9,14 +9,13 @@ import {
   Icon,
   Dimmer,
   Loader,
-  Table,
   Divider,
   Grid,
   Label,
   Input,
   Checkbox,
   Confirm,
-  Ref,
+  Message,
 } from "semantic-ui-react";
 import { useLocation, Link } from "@reach/router";
 import Cookies from "js-cookie";
@@ -24,7 +23,6 @@ import "moment/locale/es";
 import "react-dates/initialize";
 import "react-dates/lib/css/_datepicker.css";
 import { SingleDatePicker } from "react-dates";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import AssignClientsModal from "../modals/Clients/AssignClients";
 import TableSettingsModal from "../modals/Clients/TableSettings";
@@ -35,12 +33,7 @@ import SearchProductModal from "../modals/SearchProducts";
 import { defaultColumns } from "../utils/initColumns";
 import { SingleDatePickerPhrases } from "../utils/localeCalendarPhrases";
 import EditClientModal from "../modals/Clients/EditClient";
-
-const getItemStyle = (isDragging, draggableStyle) => ({
-  display: isDragging ? "table" : "",
-
-  ...draggableStyle,
-});
+import { Clients } from "../components/Clients";
 
 export const RouteDetail = () => {
   const [id, setId] = useState(0);
@@ -68,6 +61,9 @@ export const RouteDetail = () => {
   const [showConfirmationDelete, setShowConfirmationDelete] = useState(false);
   const [showEditClientModal, setShowEditClientModal] = useState(false);
   const [clientToEdit, setClientToEdit] = useState({});
+  const [showError, setShowError] = useState(false);
+  const [errorHeader, setErrorHeader] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(false);
 
   useEffect(function () {
     if (params && params.length) {
@@ -135,9 +131,7 @@ export const RouteDetail = () => {
     const reOrderer_client = filteredClients[source.index];
     reOrderer_clients.splice(source.index, 1);
     reOrderer_clients.splice(destination.index, 0, reOrderer_client);
-
-    setFilteredClients(reOrderer_clients);
-    console.log("reorderer");
+    handleUpdateClientsOrder(reOrderer_clients);
   };
 
   const fetchBillingInfo = () => {
@@ -421,6 +415,38 @@ export const RouteDetail = () => {
     handleRemoveClient();
   };
 
+  const handleUpdateClientsOrder = (reOrderer_clients) => {
+    const oldOrder = filteredClients;
+    setFilteredClients(reOrderer_clients);
+    const reOrderer_ids = reOrderer_clients.map((client) => ({
+      idCliente: client.id,
+    }));
+
+    const data = {
+      headers: new Headers({
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      }),
+      method: "POST",
+      body: JSON.stringify(reOrderer_ids),
+    };
+    fetch(`${process.env.REACT_APP_BASE_URL}/clientes/${id}/ordenar`, data)
+      .then((res) => res.json())
+      .then((response) => {
+        if (response.status === "error") {
+          setErrorHeader("Error al reordenar las filas");
+          setErrorMessage(response.message);
+          setShowError(true);
+          setFilteredClients(oldOrder);
+          setTimeout(() => {
+            setErrorHeader("");
+            setErrorMessage("");
+            setShowError(false);
+          }, 2000);
+        }
+      });
+  };
+
   const renderDatePicker = () => (
     <SingleDatePicker
       dayAriaLabelFormat="ES"
@@ -514,13 +540,9 @@ export const RouteDetail = () => {
 
   const renderClients = () => {
     return (
-      <Container
-        fluid={realColumnCount > 10}
-        textAlign="center"
-        className="mh-vh-100"
-      >
+      <div>
         <Grid>
-          <Grid.Column width={4} floated="left">
+          <Grid.Column mobile={16} computer={4} floated="left">
             <Input
               icon="search"
               placeholder="Filtrado de clientes"
@@ -530,10 +552,10 @@ export const RouteDetail = () => {
               }}
             />
           </Grid.Column>
-          <Grid.Column width={5} floated="left">
+          <Grid.Column mobile={16} computer={5} floated="left">
             {renderDatePicker()}
           </Grid.Column>
-          <Grid.Column width={3} floated="right">
+          <Grid.Column mobile={16} computer={3} floated="right">
             <Button
               primary
               disabled={!clients || !clients.length || !id || !date}
@@ -545,119 +567,24 @@ export const RouteDetail = () => {
             </Button>
           </Grid.Column>
         </Grid>
-        <Grid style={{ overflowX: "auto", overflowY: "hidden" }}>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Table
-              size="small"
-              celled
-              selectable
-              style={{
-                overflowX: "auto",
-                overflowY: "hidden",
-                marginBottom: 30,
-              }}
-            >
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell collapsing key={`main-column-handle`}>
-                    {""}
-                  </Table.HeaderCell>
-                  {columns.map((column, index) => {
-                    if (column.display) {
-                      return (
-                        <Table.HeaderCell
-                          collapsing
-                          key={`main-column-${column}-${index}`}
-                        >
-                          {column.key === "facturar" ? (
-                            <Button.Group>
-                              <Button
-                                positive
-                                onClick={() => {
-                                  handleTogglePrintBilling(true);
-                                }}
-                              >
-                                Facturar
-                              </Button>
-                              <Button.Or text="o" />
-                              <Button
-                                onClick={() => {
-                                  handleTogglePrintBilling(false);
-                                }}
-                              >
-                                No facturar
-                              </Button>
-                            </Button.Group>
-                          ) : (
-                            column.label
-                          )}
-                        </Table.HeaderCell>
-                      );
-                    }
-                  })}
-                </Table.Row>
-              </Table.Header>
-
-              <Droppable droppableId="tableBody">
-                {(provided, snapshot) => (
-                  <Ref innerRef={provided.innerRef}>
-                    <Table.Body {...provided.droppableProps}>
-                      {filteredClients.map((client, index) => (
-                        <Draggable
-                          draggableId={`${client.id}-${client.codigo}`}
-                          index={index}
-                          key={client.id}
-                        >
-                          {(provided, snapshot) => (
-                            <Ref innerRef={provided.innerRef}>
-                              <Table.Row
-                                key={`client${client.id}row`}
-                                {...provided.draggableProps}
-                                style={getItemStyle(
-                                  snapshot.isDragging,
-                                  provided.draggableProps.style
-                                )}
-                              >
-                                <Table.Cell>
-                                  <Icon
-                                    name="grab"
-                                    {...provided.dragHandleProps}
-                                  />
-                                </Table.Cell>
-                                {columns.map((column, index) => {
-                                  if (column.display) {
-                                    return (
-                                      <Table.Cell
-                                        key={`row-${client.id}[${column.label}]- ${index}`}
-                                      >
-                                        {column.key === "acciones"
-                                          ? renderActions(client)
-                                          : column.key === "nombreproducto"
-                                          ? renderProductInTable(
-                                              client,
-                                              client[column.key]
-                                            )
-                                          : column.key === "facturar"
-                                          ? renderBillCheckbox(client)
-                                          : client[column.key]}
-                                      </Table.Cell>
-                                    );
-                                  }
-                                })}
-                              </Table.Row>
-                            </Ref>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </Table.Body>
-                  </Ref>
-                )}
-              </Droppable>
-            </Table>
-          </DragDropContext>
-        </Grid>
-      </Container>
+        <Container fluid textAlign="center" className="mh-vh-100 mt-2">
+          {showError ? (
+            <Message negative>
+              <Message.Header>{errorHeader}</Message.Header>
+              <p>{errorMessage}</p>
+            </Message>
+          ) : null}
+          <Clients
+            columns={columns}
+            clients={filteredClients}
+            handleTogglePrintBilling={handleTogglePrintBilling}
+            renderActions={renderActions}
+            renderProductInTable={renderProductInTable}
+            renderBillCheckbox={renderBillCheckbox}
+            onDragEnd={onDragEnd}
+          />
+        </Container>
+      </div>
     );
   };
 

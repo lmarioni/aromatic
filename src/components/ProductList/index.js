@@ -17,7 +17,6 @@ const ProductList = ({ productList = [], handleDelete = null }) => {
   const [filteredProducts, setFilteredProducts] = useState([]);
 
   useEffect(() => {
-    console.log(handleDelete);
     if (productList) {
       const parsedProducts = productList.map((prod) => {
         return {

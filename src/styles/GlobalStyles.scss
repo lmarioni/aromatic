@@ -78,11 +78,12 @@ td {
     flex-direction: row;
     justify-content: space-evenly;
 }
-
-.mh-vh-100{
+.mh-vh-100 {
     min-height: calc(100vh - 85px);
 }
-
+.mt-2 {
+    margin-top: 2em;
+}
 .h-vh-100 {
     height: calc(100vh - 85px);
 }
@@ -129,6 +130,9 @@ td {
 }
 .justify-content-evenly {
     justify-content: space-evenly;
+}
+.justify-content-center {
+    justify-content: center;
 }
 .separatedSegment {
     padding: 2em 0;
