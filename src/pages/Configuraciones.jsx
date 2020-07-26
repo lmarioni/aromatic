@@ -36,7 +36,6 @@ export const Configuraciones = () => {
     fetch(`${process.env.REACT_APP_BASE_URL}/configuracion/facturas`, data)
       .then((res) => res.json())
       .then((response) => {
-        console.log(response)
         setConfiguracion(response);
         setInput(response);
         setLoading(false);
@@ -72,6 +71,7 @@ export const Configuraciones = () => {
         .then((response) => {
         setSending(false)
             if(response.status === 'success'){
+                window.location.href = `${process.env.REACT_APP_URL}/configuraciones`;
                 setRespuesta({class: 'positive', message: "Numero de serie ediato correctamente"})
             }else{
                 setRespuesta({class: 'error', message: response.message})
