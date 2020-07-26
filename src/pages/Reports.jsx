@@ -248,14 +248,18 @@ export const Reports = () => {
         <Header as="h1" inverted textAlign="center">
           Reportes
         </Header>
+        <hr style={{marginBottom: 30}}/>
         <Grid>
           <Grid.Column width={5} floated="left">
+            <h3 style={{color: 'white'}}> 1- Elegir fecha</h3>
             {renderDatePicker()}
           </Grid.Column>
           <Grid.Column width={4} floated="left">
+          <h3 style={{color: 'white'}}> 2- Elegir cliente (opcional)</h3>
             {renderSearchClient()}
           </Grid.Column>
           <Grid.Column width={3} floated="right">
+          <h3 style={{color: 'white'}}> 3- Click para buscar</h3>
             {renderSearchReports()}
           </Grid.Column>
         </Grid>

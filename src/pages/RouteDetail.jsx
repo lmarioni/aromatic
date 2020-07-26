@@ -480,7 +480,7 @@ export const RouteDetail = () => {
     <div>
       <Icon
         name="trash"
-        style={{ color: "red", cursor: "pointer", marginRight: 20 }}
+        style={{fontSize: 15, marginRight: 5, cursor: 'pointer', color: 'red'}}
         onClick={() => {
           setClientToDelete(client);
           setShowConfirmationDelete(true);
@@ -488,7 +488,7 @@ export const RouteDetail = () => {
       />
       <Icon
         name="edit"
-        style={{ cursor: "pointer" }}
+        style={{fontSize: 15, marginLeft: 5, cursor: 'pointer'}}
         onClick={() => {
           setClientToEdit(client);
           setShowEditClientModal(true);
