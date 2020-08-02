@@ -595,7 +595,7 @@ export const RouteDetail = () => {
         header="Eliminar cliente"
         content="Esta acción eliminará al cliente"
         confirmButton="Si, eliminar"
-        cancelButton="No, volver"
+        cancelButton="Cancelar"
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmationDelete}
       />
@@ -604,7 +604,7 @@ export const RouteDetail = () => {
         header="Imprimir facturas"
         content="Esta acción enviará a generar las facturas"
         confirmButton="Generar las facturas"
-        cancelButton="Volver"
+        cancelButton="Cancelar"
         onCancel={handleCancel}
         onConfirm={handleConfirmation}
       />
