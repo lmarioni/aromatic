@@ -55,20 +55,20 @@ export const Clients = ({
                   {column.key === "facturar" ? (
                     <Button.Group>
                       <Button
+                        onClick={() => {
+                          handleTogglePrintBilling(false);
+                        }}
+                      >
+                        No facturar
+                      </Button>
+                      <Button.Or text="o" />
+                      <Button
                         positive
                         onClick={() => {
                           handleTogglePrintBilling(true);
                         }}
                       >
                         Facturar
-                      </Button>
-                      <Button.Or text="o" />
-                      <Button
-                        onClick={() => {
-                          handleTogglePrintBilling(false);
-                        }}
-                      >
-                        No facturar
                       </Button>
                     </Button.Group>
                   ) : (
@@ -101,8 +101,8 @@ export const Clients = ({
                           provided.draggableProps.style
                         )}
                       >
-                        <Table.Cell>
-                          <Icon name="grab" {...provided.dragHandleProps} />
+                        <Table.Cell style={{textAlign: 'center', fontSize: 18}}>
+                          <Icon name="th" {...provided.dragHandleProps} />
                         </Table.Cell>
                         {columns.map((column, index) => {
                           if (column.display) {
@@ -113,10 +113,14 @@ export const Clients = ({
                                 {column.key === "acciones"
                                   ? renderActions(client)
                                   : column.key === "nombreproducto"
-                                  ? renderProductInTable(
-                                      client,
-                                      client[column.key]
-                                    )
+                                  ? <p>
+                                    {
+                                      renderProductInTable(
+                                        client,
+                                       <p>{client[column.key]} <br/> </p> 
+                                      )
+                                    }
+                                  </p>
                                   : column.key === "facturar"
                                   ? renderBillCheckbox(client)
                                   : client[column.key]}
@@ -177,7 +181,7 @@ export const Clients = ({
                         <Card.Description>
                           {columns.map((column, index) => {
                             if (column.display) {
-                              return <div key={`col-${index}`}>{client[column.key]}</div>;
+                              return <div key={`col-${index}`}> asd {client[column.key]}</div>;
                             }
                           })}
                         </Card.Description>
