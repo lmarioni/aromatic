@@ -102,7 +102,7 @@ export const Clients = ({
                         )}
                       >
                         <Table.Cell style={{textAlign: 'center', fontSize: 18}}>
-                          <Icon name="th" {...provided.dragHandleProps} />
+                          <Icon name="th" {...provided.dragHandleProps} /> <small>{index + 1}</small>
                         </Table.Cell>
                         {columns.map((column, index) => {
                           if (column.display) {
