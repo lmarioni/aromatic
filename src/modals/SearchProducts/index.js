@@ -413,28 +413,8 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
                   <List.Header as="h5">{`${product.producto.nombre} x ${product.cantidad}`}</List.Header>
                   <List.Description>
                     {product.producto.descripcion}
-                    <List>
-                      <List.Item as="h6">
-                        <Icon name="euro" />
-                        <List.Content>
-                          <List.Header>{product.producto.precio}</List.Header>
-                          <List.Description>
-                            Precio actual del producto
-                          </List.Description>
-                        </List.Content>
-                      </List.Item>
-                      <List.Item as="h6">
-                        <Icon name="euro" />
-                        <List.Content>
-                          <List.Header>
-                            {product.producto.precioCosto}
-                          </List.Header>
-                          <List.Description>
-                            Precio costo del producto
-                          </List.Description>
-                        </List.Content>
-                      </List.Item>
-                    </List>
+                    <p> - <b>Precio: </b> <Icon name="euro" /> {product.producto.precio} </p>
+                   
                   </List.Description>
                 </List.Content>
                 <List.Content floated="right">
@@ -474,7 +454,7 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
   );
 
   const renderModal = () => (
-    <Modal size="small" open={open}>
+    <Modal size="large" centered={false} open={open}>
       <Header content="Búsqueda / Creación de producto" />
       <Modal.Content scrolling className="modalContent">
         {loading ? renderLoading() : renderModalContent()}
