@@ -155,10 +155,11 @@ const PrintBillingModal = ({
 
   const renderCreatedBills = () => (
     <div>
-      <Segment placeholder>
+      <Segment placeholder textAlign="center">
         <Header as="h2" textAlign="center">
           Parece que estas facturas ya se encuentran emitidas.
         </Header>
+        <p> Esta ruta para esta fecha ya fue facturada </p>
       </Segment>
       <Segment placeholder textAlign="center">
         <Grid columns={2} stackable textAlign="center">
