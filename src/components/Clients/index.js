@@ -110,20 +110,20 @@ export const Clients = ({
                               <Table.Cell
                                 key={`row-${client.id}[${column.label}]- ${index}`}
                               >
-                                {column.key === "acciones"
-                                  ? renderActions(client)
-                                  : column.key === "nombreproducto"
-                                  ? <p>
-                                    {
-                                      renderProductInTable(
-                                        client,
-                                       <p>{client[column.key]} <br/> </p> 
-                                      )
-                                    }
+                                {column.key === "acciones" ? (
+                                  renderActions(client)
+                                ) : column.key === "nombreproducto" ? (
+                                  <p>
+                                    {renderProductInTable(
+                                      client,
+                                      client[column.key]
+                                    )}
                                   </p>
-                                  : column.key === "facturar"
-                                  ? renderBillCheckbox(client)
-                                  : client[column.key]}
+                                ) : column.key === "facturar" ? (
+                                  renderBillCheckbox(client)
+                                ) : (
+                                  client[column.key]
+                                )}
                               </Table.Cell>
                             );
                           }
@@ -145,7 +145,11 @@ export const Clients = ({
     <Droppable droppableId="listViewBody">
       {(provided, snapshot) => (
         <Ref innerRef={provided.innerRef}>
-          <Card.Group divided="true" {...provided.droppableProps} className="justify-content-center">
+          <Card.Group
+            divided="true"
+            {...provided.droppableProps}
+            className="justify-content-center"
+          >
             {clients.map((client, index) => (
               <Draggable
                 draggableId={`${client.id}-${client.codigo}`}
@@ -181,7 +185,12 @@ export const Clients = ({
                         <Card.Description>
                           {columns.map((column, index) => {
                             if (column.display) {
-                              return <div key={`col-${index}`}> asd {client[column.key]}</div>;
+                              return (
+                                <div key={`col-${index}`}>
+                                  {" "}
+                                  asd {client[column.key]}
+                                </div>
+                              );
                             }
                           })}
                         </Card.Description>

@@ -175,7 +175,11 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
   };
 
   const handleSubmit = () => {
-    handleCloseSearchProductModal(productList);
+    if(productList.length){
+      handleCloseSearchProductModal(productList);
+    }else{
+      handleCloseSearchProductModal();
+    }
   };
 
   const handleSearchChange = async (value) => {
@@ -404,7 +408,7 @@ const SearchProductModal = ({ id, open, onClose, client = {} }) => {
           </Form>
         </Segment>
       )}
-      <Segment placeholder loading={loading}>
+      <Segment placeholder loading={loading} className="center-placeholder">
         {productList && productList.length ? (
           <List divided verticalAlign="middle" animated className="w-100">
             {productList.map((product) => (

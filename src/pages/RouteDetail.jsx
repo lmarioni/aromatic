@@ -16,6 +16,7 @@ import {
   Checkbox,
   Confirm,
   Message,
+  List,
 } from "semantic-ui-react";
 import { useLocation, Link } from "@reach/router";
 import Cookies from "js-cookie";
@@ -480,7 +481,12 @@ export const RouteDetail = () => {
     <div>
       <Icon
         name="trash"
-        style={{fontSize: 15, marginRight: 5, cursor: 'pointer', color: 'red'}}
+        style={{
+          fontSize: 15,
+          marginRight: 5,
+          cursor: "pointer",
+          color: "red",
+        }}
         onClick={() => {
           setClientToDelete(client);
           setShowConfirmationDelete(true);
@@ -488,7 +494,7 @@ export const RouteDetail = () => {
       />
       <Icon
         name="edit"
-        style={{fontSize: 15, marginLeft: 5, cursor: 'pointer'}}
+        style={{ fontSize: 15, marginLeft: 5, cursor: "pointer" }}
         onClick={() => {
           setClientToEdit(client);
           setShowEditClientModal(true);
@@ -497,10 +503,21 @@ export const RouteDetail = () => {
     </div>
   );
 
+  const renderProductList = (productName = "") => {
+    const nameArray = productName.split("-");
+    return (
+      <List>
+        {nameArray.map((prod, index) => (
+          <List.Item key={`prodList-${prod}${index}`}>{prod}</List.Item>
+        ))}
+      </List>
+    );
+  };
+
   const renderProductInTable = (client = {}, productName = "") => (
     <Button as="div" labelPosition="left">
       <Label as="a" basic>
-        {productName}
+        {renderProductList(productName)}
       </Label>
       <Button
         icon
