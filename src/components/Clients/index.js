@@ -16,11 +16,13 @@ import {
 const getItemStyle = (isDragging, draggableStyle) => ({
   display: isDragging ? "table" : "",
   ...draggableStyle,
+  
 });
 
 export const Clients = ({
   columns = [],
   clients = [],
+  canDrag = false,
   handleTogglePrintBilling = () => {},
   renderActions = () => {},
   renderProductInTable = () => {},
@@ -87,6 +89,7 @@ export const Clients = ({
             <Table.Body {...provided.droppableProps}>
               {clients.map((client, index) => (
                 <Draggable
+                  isDragDisabled={!canDrag}
                   draggableId={`${client.id}-${client.codigo}`}
                   index={index}
                   key={client.id}

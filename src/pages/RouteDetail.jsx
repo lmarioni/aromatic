@@ -127,12 +127,13 @@ export const RouteDetail = () => {
     ) {
       return;
     }
-
     const reOrderer_clients = Object.assign([], filteredClients);
     const reOrderer_client = filteredClients[source.index];
     reOrderer_clients.splice(source.index, 1);
     reOrderer_clients.splice(destination.index, 0, reOrderer_client);
-    handleUpdateClientsOrder(reOrderer_clients);
+    if (clients.length === filteredClients.length) {
+      handleUpdateClientsOrder(reOrderer_clients);
+    }
   };
 
   const fetchBillingInfo = () => {
@@ -255,7 +256,6 @@ export const RouteDetail = () => {
   const handleCloseEditClientsModal = (editedClient = {}) => {
     setShowEditClientModal(false);
     setClientToEdit({});
-
     if (editedClient && Object.keys(editedClient).length) {
       const mappedClients = clients.map((client) => {
         if (client.id === editedClient.id) {
@@ -419,6 +419,7 @@ export const RouteDetail = () => {
   const handleUpdateClientsOrder = (reOrderer_clients) => {
     const oldOrder = filteredClients;
     setFilteredClients(reOrderer_clients);
+    setClients(reOrderer_clients);
     const reOrderer_ids = reOrderer_clients.map((client) => ({
       idCliente: client.id,
     }));
@@ -592,6 +593,7 @@ export const RouteDetail = () => {
             </Message>
           ) : null}
           <Clients
+            canDrag={clients.length === filteredClients.length}
             columns={columns}
             clients={filteredClients}
             handleTogglePrintBilling={handleTogglePrintBilling}
