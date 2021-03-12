@@ -55,7 +55,7 @@
     "react-beautiful-dnd": "^13.0.0",
     "react-datasheet": "^1.4.4",
     "react-dates": "^21.8.0",
-    "react-dev-utils": "^10.2.1",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "^16.13.1",
     "react-excel-renderer": "^1.1.0",
     "react-icons": "^3.10.0",
